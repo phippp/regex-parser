@@ -18,7 +18,7 @@ public class Main {
         RegExLexer lexer = new RegExLexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         RegExParser parser = new RegExParser(tokens);
-        ParseTree tree = parser.exp();
+        ParseTree tree = parser.regex();
         System.out.println(tree.toStringTree(parser));
     }
 }
