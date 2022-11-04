@@ -1,4 +1,4 @@
-package org.phippp.grammar;
+package org.phippp.antlr4;
 
 // Generated from java-escape by ANTLR 4.11.1
 import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
@@ -82,12 +82,12 @@ public class RegExBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitSimple_group(RegExParser.Simple_groupContext ctx) { return visitChildren(ctx); }
+	@Override public T visitSimpleGroup(RegExParser.SimpleGroupContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitNon_capturing(RegExParser.Non_capturingContext ctx) { return visitChildren(ctx); }
+	@Override public T visitNonCapturing(RegExParser.NonCapturingContext ctx) { return visitChildren(ctx); }
 }

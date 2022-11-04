@@ -1,17 +1,14 @@
-package org.phippp.grammar;
+package org.phippp.antlr4;
 
 // Generated from java-escape by ANTLR 4.11.1
-
-import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.atn.ATN;
-import org.antlr.v4.runtime.atn.ATNDeserializer;
-import org.antlr.v4.runtime.atn.ParserATNSimulator;
-import org.antlr.v4.runtime.atn.PredictionContextCache;
+import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
-import org.antlr.v4.runtime.tree.ParseTreeVisitor;
-import org.antlr.v4.runtime.tree.TerminalNode;
-
+import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.misc.*;
+import org.antlr.v4.runtime.tree.*;
 import java.util.List;
+import java.util.Iterator;
+import java.util.ArrayList;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast", "CheckReturnValue"})
 public class RegExParser extends Parser {
@@ -110,14 +107,16 @@ public class RegExParser extends Parser {
 	}
 	@SuppressWarnings("CheckReturnValue")
 	public static class AnchorsContext extends ExpContext {
+		public Token start;
 		public RegexContext inner;
+		public Token end;
 		public RegexContext regex() {
 			return getRuleContext(RegexContext.class,0);
 		}
 		public AnchorsContext(ExpContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RegExVisitor ) return ((RegExVisitor<? extends T>)visitor).visitAnchors(this);
+			if ( visitor instanceof RegExVisitor) return ((RegExVisitor<? extends T>)visitor).visitAnchors(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -136,7 +135,7 @@ public class RegExParser extends Parser {
 			if (_la==T__0) {
 				{
 				setState(6);
-				match(T__0);
+				((AnchorsContext)_localctx).start = match(T__0);
 				}
 			}
 
@@ -148,7 +147,7 @@ public class RegExParser extends Parser {
 			if (_la==T__1) {
 				{
 				setState(10);
-				match(T__1);
+				((AnchorsContext)_localctx).end = match(T__1);
 				}
 			}
 
@@ -179,6 +178,7 @@ public class RegExParser extends Parser {
 	}
 	@SuppressWarnings("CheckReturnValue")
 	public static class ReferenceContext extends RegexContext {
+		public Token ref;
 		public RegexContext regex() {
 			return getRuleContext(RegexContext.class,0);
 		}
@@ -186,7 +186,7 @@ public class RegExParser extends Parser {
 		public ReferenceContext(RegexContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RegExVisitor ) return ((RegExVisitor<? extends T>)visitor).visitReference(this);
+			if ( visitor instanceof RegExVisitor) return ((RegExVisitor<? extends T>)visitor).visitReference(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -196,7 +196,7 @@ public class RegExParser extends Parser {
 		public CharacterContext(RegexContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RegExVisitor ) return ((RegExVisitor<? extends T>)visitor).visitCharacter(this);
+			if ( visitor instanceof RegExVisitor) return ((RegExVisitor<? extends T>)visitor).visitCharacter(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -206,7 +206,7 @@ public class RegExParser extends Parser {
 		public DotContext(RegexContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RegExVisitor ) return ((RegExVisitor<? extends T>)visitor).visitDot(this);
+			if ( visitor instanceof RegExVisitor) return ((RegExVisitor<? extends T>)visitor).visitDot(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -224,7 +224,7 @@ public class RegExParser extends Parser {
 		public AlternationContext(RegexContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RegExVisitor ) return ((RegExVisitor<? extends T>)visitor).visitAlternation(this);
+			if ( visitor instanceof RegExVisitor) return ((RegExVisitor<? extends T>)visitor).visitAlternation(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -236,7 +236,7 @@ public class RegExParser extends Parser {
 		public GroupsContext(RegexContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RegExVisitor ) return ((RegExVisitor<? extends T>)visitor).visitGroups(this);
+			if ( visitor instanceof RegExVisitor) return ((RegExVisitor<? extends T>)visitor).visitGroups(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -253,7 +253,7 @@ public class RegExParser extends Parser {
 		public ConcatContext(RegexContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RegExVisitor ) return ((RegExVisitor<? extends T>)visitor).visitConcat(this);
+			if ( visitor instanceof RegExVisitor) return ((RegExVisitor<? extends T>)visitor).visitConcat(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -266,7 +266,7 @@ public class RegExParser extends Parser {
 		public PlusContext(RegexContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RegExVisitor ) return ((RegExVisitor<? extends T>)visitor).visitPlus(this);
+			if ( visitor instanceof RegExVisitor) return ((RegExVisitor<? extends T>)visitor).visitPlus(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -279,7 +279,7 @@ public class RegExParser extends Parser {
 		public KleeneContext(RegexContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RegExVisitor ) return ((RegExVisitor<? extends T>)visitor).visitKleene(this);
+			if ( visitor instanceof RegExVisitor) return ((RegExVisitor<? extends T>)visitor).visitKleene(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -399,7 +399,7 @@ public class RegExParser extends Parser {
 						setState(29);
 						match(T__2);
 						setState(30);
-						match(NUMBER);
+						((ReferenceContext)_localctx).ref = match(NUMBER);
 						}
 						break;
 					}
@@ -435,28 +435,28 @@ public class RegExParser extends Parser {
 		}
 	}
 	@SuppressWarnings("CheckReturnValue")
-	public static class Simple_groupContext extends GroupContext {
+	public static class SimpleGroupContext extends GroupContext {
 		public RegexContext inner;
 		public RegexContext regex() {
 			return getRuleContext(RegexContext.class,0);
 		}
-		public Simple_groupContext(GroupContext ctx) { copyFrom(ctx); }
+		public SimpleGroupContext(GroupContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RegExVisitor ) return ((RegExVisitor<? extends T>)visitor).visitSimple_group(this);
+			if ( visitor instanceof RegExVisitor) return ((RegExVisitor<? extends T>)visitor).visitSimpleGroup(this);
 			else return visitor.visitChildren(this);
 		}
 	}
 	@SuppressWarnings("CheckReturnValue")
-	public static class Non_capturingContext extends GroupContext {
+	public static class NonCapturingContext extends GroupContext {
 		public RegexContext inner;
 		public RegexContext regex() {
 			return getRuleContext(RegexContext.class,0);
 		}
-		public Non_capturingContext(GroupContext ctx) { copyFrom(ctx); }
+		public NonCapturingContext(GroupContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RegExVisitor ) return ((RegExVisitor<? extends T>)visitor).visitNon_capturing(this);
+			if ( visitor instanceof RegExVisitor) return ((RegExVisitor<? extends T>)visitor).visitNonCapturing(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -469,25 +469,25 @@ public class RegExParser extends Parser {
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case T__3:
-				_localctx = new Simple_groupContext(_localctx);
+				_localctx = new SimpleGroupContext(_localctx);
 				enterOuterAlt(_localctx, 1);
 				{
 				setState(36);
 				match(T__3);
 				setState(37);
-				((Simple_groupContext)_localctx).inner = regex(0);
+				((SimpleGroupContext)_localctx).inner = regex(0);
 				setState(38);
 				match(T__4);
 				}
 				break;
 			case T__5:
-				_localctx = new Non_capturingContext(_localctx);
+				_localctx = new NonCapturingContext(_localctx);
 				enterOuterAlt(_localctx, 2);
 				{
 				setState(40);
 				match(T__5);
 				setState(41);
-				((Non_capturingContext)_localctx).inner = regex(0);
+				((NonCapturingContext)_localctx).inner = regex(0);
 				setState(42);
 				match(T__4);
 				}

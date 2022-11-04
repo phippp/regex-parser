@@ -1,23 +1,23 @@
 grammar RegEx;
 
 exp
-    : '/^'? inner=regex '/$'?           #anchors
+    : (start='/^')? inner=regex (end='/$')?             #anchors
     ;
 
 regex
-    : CHAR                              #character
-    | ANY                               #dot
-    | group                             #groups
-    | regex KLEENE                      #kleene
-    | regex PLUS                        #plus
-    | left=regex right=regex            #concat
-    | left=regex OR right=regex         #alternation
-    | regex '$' NUMBER                  #reference
+    : CHAR                                              #character
+    | ANY                                               #dot
+    | group                                             #groups
+    | regex KLEENE                                      #kleene
+    | regex PLUS                                        #plus
+    | left=regex right=regex                            #concat
+    | left=regex OR right=regex                         #alternation
+    | regex '$' ref=NUMBER                              #reference
     ;
 
 group
-    : '(' inner=regex ')'               #simple_group
-    | '(?:' inner=regex ')'             #non_capturing
+    : '(' inner=regex ')'                               #simpleGroup
+    | '(?:' inner=regex ')'                             #nonCapturing
     ;
 
 ANY: '-';

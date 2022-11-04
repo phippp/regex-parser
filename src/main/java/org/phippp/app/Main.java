@@ -4,8 +4,8 @@ import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.phippp.grammar.RegExLexer;
-import org.phippp.grammar.RegExParser;
+import org.phippp.antlr4.RegExLexer;
+import org.phippp.antlr4.RegExParser;
 
 import java.util.Scanner;
 
