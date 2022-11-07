@@ -6,7 +6,7 @@ regex
     | regex PLUS                                        #plus
     | left=regex right=regex                            #concat
     | left=regex OR right=regex                         #alternation
-    | regex '$' ref=NUMBER                              #reference
+    | left=regex '$' ref=NUMBER                              #reference
     ;
 
 group
