@@ -3,10 +3,10 @@ grammar RegEx;
 regex
     : CHAR                                              #character
     | group                                             #groups
-    | regex PLUS                                        #plus
+    | main=regex PLUS                                   #plus
     | left=regex right=regex                            #concat
     | left=regex OR right=regex                         #alternation
-    | left=regex '$' ref=NUMBER                              #reference
+    | left=regex '$' ref=NUMBER                         #reference
     ;
 
 group

@@ -20,7 +20,6 @@ public class Main {
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         RegExParser parser = new RegExParser(tokens);
         ParseTree tree = parser.regex();
-        System.out.println(tree.toStringTree(parser));
 
         String out = new Visitor().visit(tree);
         System.out.println(out);

@@ -111,7 +111,7 @@ public class RegExParser extends Parser {
 		public ReferenceContext(RegexContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RegExVisitor) return ((RegExVisitor<? extends T>)visitor).visitReference(this);
+			if ( visitor instanceof RegExVisitor ) return ((RegExVisitor<? extends T>)visitor).visitReference(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -121,7 +121,7 @@ public class RegExParser extends Parser {
 		public CharacterContext(RegexContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RegExVisitor) return ((RegExVisitor<? extends T>)visitor).visitCharacter(this);
+			if ( visitor instanceof RegExVisitor ) return ((RegExVisitor<? extends T>)visitor).visitCharacter(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -139,7 +139,7 @@ public class RegExParser extends Parser {
 		public AlternationContext(RegexContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RegExVisitor) return ((RegExVisitor<? extends T>)visitor).visitAlternation(this);
+			if ( visitor instanceof RegExVisitor ) return ((RegExVisitor<? extends T>)visitor).visitAlternation(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -151,7 +151,7 @@ public class RegExParser extends Parser {
 		public GroupsContext(RegexContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RegExVisitor) return ((RegExVisitor<? extends T>)visitor).visitGroups(this);
+			if ( visitor instanceof RegExVisitor ) return ((RegExVisitor<? extends T>)visitor).visitGroups(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -168,20 +168,21 @@ public class RegExParser extends Parser {
 		public ConcatContext(RegexContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RegExVisitor) return ((RegExVisitor<? extends T>)visitor).visitConcat(this);
+			if ( visitor instanceof RegExVisitor ) return ((RegExVisitor<? extends T>)visitor).visitConcat(this);
 			else return visitor.visitChildren(this);
 		}
 	}
 	@SuppressWarnings("CheckReturnValue")
 	public static class PlusContext extends RegexContext {
+		public RegexContext main;
+		public TerminalNode PLUS() { return getToken(RegExParser.PLUS, 0); }
 		public RegexContext regex() {
 			return getRuleContext(RegexContext.class,0);
 		}
-		public TerminalNode PLUS() { return getToken(RegExParser.PLUS, 0); }
 		public PlusContext(RegexContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RegExVisitor) return ((RegExVisitor<? extends T>)visitor).visitPlus(this);
+			if ( visitor instanceof RegExVisitor ) return ((RegExVisitor<? extends T>)visitor).visitPlus(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -266,6 +267,7 @@ public class RegExParser extends Parser {
 					case 3:
 						{
 						_localctx = new PlusContext(new RegexContext(_parentctx, _parentState));
+						((PlusContext)_localctx).main = _prevctx;
 						pushNewRecursionContext(_localctx, _startState, RULE_regex);
 						setState(14);
 						if (!(precpred(_ctx, 4))) throw new FailedPredicateException(this, "precpred(_ctx, 4)");
@@ -327,7 +329,7 @@ public class RegExParser extends Parser {
 		public SimpleGroupContext(GroupContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RegExVisitor) return ((RegExVisitor<? extends T>)visitor).visitSimpleGroup(this);
+			if ( visitor instanceof RegExVisitor ) return ((RegExVisitor<? extends T>)visitor).visitSimpleGroup(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -340,7 +342,7 @@ public class RegExParser extends Parser {
 		public NonCapturingContext(GroupContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof RegExVisitor) return ((RegExVisitor<? extends T>)visitor).visitNonCapturing(this);
+			if ( visitor instanceof RegExVisitor ) return ((RegExVisitor<? extends T>)visitor).visitNonCapturing(this);
 			else return visitor.visitChildren(this);
 		}
 	}
