@@ -2,6 +2,12 @@ package org.phippp.logic;
 
 public class Parts {
 
+    /**
+     * Current development setup does not use Unicode for console so
+     * unicode characters (mathematical symbols) can't be used, they have
+     * been replaced by String representations for the time being.
+     */
+
     public static final String PREFIX = "φ_α";
     public static final String IN = "IN" ; //'\u2208';
     public static final String DOT_EQ = "="; //'\u2250';

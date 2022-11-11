@@ -3,8 +3,7 @@ package org.phippp.grammar;
 import org.phippp.antlr4.RegExBaseVisitor;
 import org.phippp.antlr4.RegExParser;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.lang.String;
 
 import static org.phippp.logic.Parts.*;
@@ -12,8 +11,7 @@ import static org.phippp.logic.Parts.*;
 public class Visitor extends RegExBaseVisitor<String> {
 
     private final Map<Integer, String> references = new HashMap<>();
-    private int concatCounter = 0;
-    private int termCounter = 0;
+    private final LinkedList<Integer> terms = new LinkedList<>();
 
     /**
      * Because each function can increase the number of nodes by 1 or 2, we need to be
@@ -22,7 +20,9 @@ public class Visitor extends RegExBaseVisitor<String> {
      *      1 | reference, plus
      *      0 | character, groups
      * Think this relation can be modelled with push/pull so that we don't have to keep
-     * tracking multiple values, just what comes next.
+     * tracking multiple values, just what comes next. Decided to use linked list instead
+     * of a stack as it handles null pointers better and the decrease in performance
+     * should be so slight.
      */
 
     @Override public String visitReference(RegExParser.ReferenceContext ctx) {
@@ -30,17 +30,18 @@ public class Visitor extends RegExBaseVisitor<String> {
     }
 
     @Override public String visitCharacter(RegExParser.CharacterContext ctx) {
-        if(termCounter < 1 ) termCounter = concatCounter;
-        String result = constructTerminal(termCounter, ctx.getText().charAt(0));
-        termCounter -= (termCounter % 2 == 0) ? 1 : 2;
-        return  result;
+        int term = terms.peek() != null ? terms.pop() : 0;
+        return constructTerminal(term, ctx.getText().charAt(0));
     }
 
     @Override public String visitAlternation(RegExParser.AlternationContext ctx) {
-        return "\n " + PREFIX + "(x_" + concatCounter + ") := x_" + (concatCounter++) + " " + IN +
-                " (x_" + (concatCounter + 1) + "|x_" + concatCounter + ") " + AND + " " +
-                PREFIX + "(x_" + (++concatCounter) + ") " + AND + " " +
-                PREFIX + "(x_" + (concatCounter - 1) + ");" + visit(ctx.left) + visit(ctx.right);
+        int term = terms.peek() != null ? terms.pop() : 0;
+        int[] arr = {term + 1, term + 2};
+        for(int t : arr) terms.push(t);
+        return "\n " + PREFIX + "(x_" + term + ") := x_" + term + " " + IN +
+                " (x_" + arr[1] + "|x_" + arr[0] + ")" +
+                constructAnd(arr[0]) + constructAnd(arr[1])
+                + visit(ctx.left) + visit(ctx.right);
     }
 
     @Override public String visitGroups(RegExParser.GroupsContext ctx) {
@@ -55,11 +56,11 @@ public class Visitor extends RegExBaseVisitor<String> {
      */
 
     @Override public String visitConcat(RegExParser.ConcatContext ctx) {
-        int children = 2; // this rule will always add 2 new terms in our FC logic
-        int curr = concatCounter;
-        concatCounter += 2;
-        return "\n" + PREFIX + "(x_" + curr + ") := x_" + curr + " " + DOT_EQ + " x_" + (curr + 2) + "x_" + (curr + 1)
-                + constructAnd(curr + 2) + constructAnd(curr + 1)
+        int term = terms.peek() != null ? terms.pop() : 0;
+        int[] arr = {term + 1, term + 2};
+        for(int t : arr) terms.push(t);
+        return "\n" + PREFIX + "(x_" + term + ") := x_" + term + " " + DOT_EQ + " x_" + arr[1] + "x_" + arr[0]
+                + constructAnd(arr[1]) + constructAnd(arr[0])
                 + visit(ctx.left) + visit(ctx.right);
     }
 
