@@ -6,7 +6,9 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.phippp.antlr4.RegExLexer;
 import org.phippp.antlr4.RegExParser;
-import org.phippp.grammar.Visitor;
+import org.phippp.grammar.RegEx;
+import org.phippp.visitors.ObjectVisitor;
+import org.phippp.visitors.StringVisitor;
 
 import java.util.Scanner;
 
@@ -21,7 +23,10 @@ public class Main {
         RegExParser parser = new RegExParser(tokens);
         ParseTree tree = parser.regex();
 
-        String out = new Visitor().visit(tree);
-        System.out.println(out);
+        String out = new StringVisitor().visit(tree);
+
+        RegEx re = new ObjectVisitor().visit(tree);
+
+        System.out.println(re.toString());
     }
 }

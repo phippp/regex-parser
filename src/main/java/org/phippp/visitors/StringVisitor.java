@@ -1,4 +1,4 @@
-package org.phippp.grammar;
+package org.phippp.visitors;
 
 import org.phippp.antlr4.RegExBaseVisitor;
 import org.phippp.antlr4.RegExParser;
@@ -8,7 +8,7 @@ import java.lang.String;
 
 import static org.phippp.logic.Parts.*;
 
-public class Visitor extends RegExBaseVisitor<String> {
+public class StringVisitor extends RegExBaseVisitor<String> {
 
     private final List<String> references = new ArrayList<>();
     private final LinkedList<Integer> terms = new LinkedList<>();
