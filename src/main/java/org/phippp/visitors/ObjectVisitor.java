@@ -57,7 +57,8 @@ public class ObjectVisitor extends RegExBaseVisitor<RegEx> {
 
     @Override public RegEx visitPlus(RegExParser.PlusContext ctx) {
         RegEx[] children = {visit(ctx.main)};
-        return new RegEx(1, RegEx.Rule.PLUS, List.of(children), "");
+        Integer term = counter.getAndAdd(1);
+        return new RegEx(term, RegEx.Rule.PLUS, List.of(children), "");
     }
 
     // ----------------------------- 2 additions ----------------------------- //

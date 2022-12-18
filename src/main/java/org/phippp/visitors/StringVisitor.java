@@ -8,6 +8,7 @@ import java.lang.String;
 
 import static org.phippp.logic.Parts.*;
 
+@Deprecated
 public class StringVisitor extends RegExBaseVisitor<String> {
 
     private final List<String> references = new ArrayList<>();
