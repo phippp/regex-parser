@@ -18,10 +18,6 @@ public class ObjectVisitor extends RegExBaseVisitor<RegEx> {
      *      2 | concatenation, alternation,
      *      1 | reference, plus
      *      0 | character, groups
-     * Think this relation can be modelled with push/pull so that we don't have to keep
-     * tracking multiple values, just what comes next. Decided to use linked list instead
-     * of a stack as it handles null pointers better and the decrease in performance
-     * should be so slight.
      */
 
     // ----------------------------- 0 additions ----------------------------- //
@@ -64,10 +60,9 @@ public class ObjectVisitor extends RegExBaseVisitor<RegEx> {
     // ----------------------------- 2 additions ----------------------------- //
 
     /**
-     * The expansion of the tree under concatenation always favours the left node.
-     * This means any x_(n+1) should be on the right and x_(n+2) will be on the left,
-     * any n-sequence of concatenation will have x_(2n) being the first character in
-     * the sequence.
+     * When a tree includes concatenation, at any point it must have visited both
+     * nodes thus the left if x_n, the right is x_(n+1) and the concatenation
+     * node is x_(n+2).
      */
 
     @Override public RegEx visitAlternation(RegExParser.AlternationContext ctx) {
