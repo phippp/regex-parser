@@ -51,17 +51,17 @@ public class RegEx {
     }
 
     /**
-     * Static method to create a list of all the regex instances within the
+     * Method to create a list of all the regex instances within the
      * tree. This allows us to extract information more easily from a list
      * using streams.
      */
 
-    public static List<RegEx> traverse(RegEx node) {
+    public List<RegEx> traverse() {
         List<RegEx> result = new ArrayList<>();
-        if(!node.terminal && node.children != null && !node.children.isEmpty())
-            for(RegEx child : node.children)
-                result.addAll(traverse(child));
-        result.add(node);
+        if(!this.terminal && this.children != null && !this.children.isEmpty())
+            for(RegEx child : this.children)
+                result.addAll(child.traverse());
+        result.add(this);
         return result;
     }
 
