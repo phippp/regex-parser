@@ -16,7 +16,8 @@ public class RegExParser extends Parser {
 	protected static final PredictionContextCache _sharedContextCache =
 		new PredictionContextCache();
 	public static final int
-		T__0=1, T__1=2, T__2=3, T__3=4, OR=5, PLUS=6, NUMBER=7, CHAR=8, WS=9;
+		T__0=1, T__1=2, T__2=3, T__3=4, OR=5, PLUS=6, OPT=7, NUMBER=8, CHAR=9, 
+		WS=10;
 	public static final int
 		RULE_regex = 0, RULE_group = 1;
 	private static String[] makeRuleNames() {
@@ -28,13 +29,14 @@ public class RegExParser extends Parser {
 
 	private static String[] makeLiteralNames() {
 		return new String[] {
-			null, "'$'", "'('", "')'", "'(?:'", "'|'", "'+'"
+			null, "'$'", "'('", "')'", "'(?:'", "'|'", "'+'", "'?'"
 		};
 	}
 	private static final String[] _LITERAL_NAMES = makeLiteralNames();
 	private static String[] makeSymbolicNames() {
 		return new String[] {
-			null, null, null, null, null, "OR", "PLUS", "NUMBER", "CHAR", "WS"
+			null, null, null, null, null, "OR", "PLUS", "OPT", "NUMBER", "CHAR", 
+			"WS"
 		};
 	}
 	private static final String[] _SYMBOLIC_NAMES = makeSymbolicNames();
@@ -156,6 +158,20 @@ public class RegExParser extends Parser {
 		}
 	}
 	@SuppressWarnings("CheckReturnValue")
+	public static class OptionalContext extends RegexContext {
+		public RegexContext main;
+		public TerminalNode OPT() { return getToken(RegExParser.OPT, 0); }
+		public RegexContext regex() {
+			return getRuleContext(RegexContext.class,0);
+		}
+		public OptionalContext(RegexContext ctx) { copyFrom(ctx); }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof RegExVisitor ) return ((RegExVisitor<? extends T>)visitor).visitOptional(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	@SuppressWarnings("CheckReturnValue")
 	public static class ConcatContext extends RegexContext {
 		public RegexContext left;
 		public RegexContext right;
@@ -229,15 +245,15 @@ public class RegExParser extends Parser {
 				throw new NoViableAltException(this);
 			}
 			_ctx.stop = _input.LT(-1);
-			setState(21);
+			setState(23);
 			_errHandler.sync(this);
 			_alt = getInterpreter().adaptivePredict(_input,2,_ctx);
-			while ( _alt!=2 && _alt!= ATN.INVALID_ALT_NUMBER ) {
+			while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER ) {
 				if ( _alt==1 ) {
 					if ( _parseListeners!=null ) triggerExitRuleEvent();
 					_prevctx = _localctx;
 					{
-					setState(19);
+					setState(21);
 					_errHandler.sync(this);
 					switch ( getInterpreter().adaptivePredict(_input,1,_ctx) ) {
 					case 1:
@@ -270,28 +286,39 @@ public class RegExParser extends Parser {
 						((PlusContext)_localctx).main = _prevctx;
 						pushNewRecursionContext(_localctx, _startState, RULE_regex);
 						setState(14);
-						if (!(precpred(_ctx, 4))) throw new FailedPredicateException(this, "precpred(_ctx, 4)");
+						if (!(precpred(_ctx, 5))) throw new FailedPredicateException(this, "precpred(_ctx, 5)");
 						setState(15);
 						match(PLUS);
 						}
 						break;
 					case 4:
 						{
+						_localctx = new OptionalContext(new RegexContext(_parentctx, _parentState));
+						((OptionalContext)_localctx).main = _prevctx;
+						pushNewRecursionContext(_localctx, _startState, RULE_regex);
+						setState(16);
+						if (!(precpred(_ctx, 4))) throw new FailedPredicateException(this, "precpred(_ctx, 4)");
+						setState(17);
+						match(OPT);
+						}
+						break;
+					case 5:
+						{
 						_localctx = new ReferenceContext(new RegexContext(_parentctx, _parentState));
 						((ReferenceContext)_localctx).left = _prevctx;
 						pushNewRecursionContext(_localctx, _startState, RULE_regex);
-						setState(16);
-						if (!(precpred(_ctx, 1))) throw new FailedPredicateException(this, "precpred(_ctx, 1)");
-						setState(17);
-						match(T__0);
 						setState(18);
+						if (!(precpred(_ctx, 1))) throw new FailedPredicateException(this, "precpred(_ctx, 1)");
+						setState(19);
+						match(T__0);
+						setState(20);
 						((ReferenceContext)_localctx).ref = match(NUMBER);
 						}
 						break;
 					}
 					} 
 				}
-				setState(23);
+				setState(25);
 				_errHandler.sync(this);
 				_alt = getInterpreter().adaptivePredict(_input,2,_ctx);
 			}
@@ -351,18 +378,18 @@ public class RegExParser extends Parser {
 		GroupContext _localctx = new GroupContext(_ctx, getState());
 		enterRule(_localctx, 2, RULE_group);
 		try {
-			setState(32);
+			setState(34);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case T__1:
 				_localctx = new SimpleGroupContext(_localctx);
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(24);
-				match(T__1);
-				setState(25);
-				((SimpleGroupContext)_localctx).inner = regex(0);
 				setState(26);
+				match(T__1);
+				setState(27);
+				((SimpleGroupContext)_localctx).inner = regex(0);
+				setState(28);
 				match(T__2);
 				}
 				break;
@@ -370,11 +397,11 @@ public class RegExParser extends Parser {
 				_localctx = new NonCapturingContext(_localctx);
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(28);
-				match(T__3);
-				setState(29);
-				((NonCapturingContext)_localctx).inner = regex(0);
 				setState(30);
+				match(T__3);
+				setState(31);
+				((NonCapturingContext)_localctx).inner = regex(0);
+				setState(32);
 				match(T__2);
 				}
 				break;
@@ -407,39 +434,43 @@ public class RegExParser extends Parser {
 		case 1:
 			return precpred(_ctx, 2);
 		case 2:
-			return precpred(_ctx, 4);
+			return precpred(_ctx, 5);
 		case 3:
+			return precpred(_ctx, 4);
+		case 4:
 			return precpred(_ctx, 1);
 		}
 		return true;
 	}
 
 	public static final String _serializedATN =
-		"\u0004\u0001\t#\u0002\u0000\u0007\u0000\u0002\u0001\u0007\u0001\u0001"+
+		"\u0004\u0001\n%\u0002\u0000\u0007\u0000\u0002\u0001\u0007\u0001\u0001"+
 		"\u0000\u0001\u0000\u0001\u0000\u0003\u0000\b\b\u0000\u0001\u0000\u0001"+
 		"\u0000\u0001\u0000\u0001\u0000\u0001\u0000\u0001\u0000\u0001\u0000\u0001"+
-		"\u0000\u0001\u0000\u0001\u0000\u0005\u0000\u0014\b\u0000\n\u0000\f\u0000"+
-		"\u0017\t\u0000\u0001\u0001\u0001\u0001\u0001\u0001\u0001\u0001\u0001\u0001"+
-		"\u0001\u0001\u0001\u0001\u0001\u0001\u0003\u0001!\b\u0001\u0001\u0001"+
-		"\u0000\u0001\u0000\u0002\u0000\u0002\u0000\u0000&\u0000\u0007\u0001\u0000"+
-		"\u0000\u0000\u0002 \u0001\u0000\u0000\u0000\u0004\u0005\u0006\u0000\uffff"+
-		"\uffff\u0000\u0005\b\u0005\b\u0000\u0000\u0006\b\u0003\u0002\u0001\u0000"+
-		"\u0007\u0004\u0001\u0000\u0000\u0000\u0007\u0006\u0001\u0000\u0000\u0000"+
-		"\b\u0015\u0001\u0000\u0000\u0000\t\n\n\u0003\u0000\u0000\n\u0014\u0003"+
-		"\u0000\u0000\u0004\u000b\f\n\u0002\u0000\u0000\f\r\u0005\u0005\u0000\u0000"+
-		"\r\u0014\u0003\u0000\u0000\u0003\u000e\u000f\n\u0004\u0000\u0000\u000f"+
-		"\u0014\u0005\u0006\u0000\u0000\u0010\u0011\n\u0001\u0000\u0000\u0011\u0012"+
-		"\u0005\u0001\u0000\u0000\u0012\u0014\u0005\u0007\u0000\u0000\u0013\t\u0001"+
-		"\u0000\u0000\u0000\u0013\u000b\u0001\u0000\u0000\u0000\u0013\u000e\u0001"+
-		"\u0000\u0000\u0000\u0013\u0010\u0001\u0000\u0000\u0000\u0014\u0017\u0001"+
-		"\u0000\u0000\u0000\u0015\u0013\u0001\u0000\u0000\u0000\u0015\u0016\u0001"+
-		"\u0000\u0000\u0000\u0016\u0001\u0001\u0000\u0000\u0000\u0017\u0015\u0001"+
-		"\u0000\u0000\u0000\u0018\u0019\u0005\u0002\u0000\u0000\u0019\u001a\u0003"+
-		"\u0000\u0000\u0000\u001a\u001b\u0005\u0003\u0000\u0000\u001b!\u0001\u0000"+
-		"\u0000\u0000\u001c\u001d\u0005\u0004\u0000\u0000\u001d\u001e\u0003\u0000"+
-		"\u0000\u0000\u001e\u001f\u0005\u0003\u0000\u0000\u001f!\u0001\u0000\u0000"+
-		"\u0000 \u0018\u0001\u0000\u0000\u0000 \u001c\u0001\u0000\u0000\u0000!"+
-		"\u0003\u0001\u0000\u0000\u0000\u0004\u0007\u0013\u0015 ";
+		"\u0000\u0001\u0000\u0001\u0000\u0001\u0000\u0001\u0000\u0005\u0000\u0016"+
+		"\b\u0000\n\u0000\f\u0000\u0019\t\u0000\u0001\u0001\u0001\u0001\u0001\u0001"+
+		"\u0001\u0001\u0001\u0001\u0001\u0001\u0001\u0001\u0001\u0001\u0003\u0001"+
+		"#\b\u0001\u0001\u0001\u0000\u0001\u0000\u0002\u0000\u0002\u0000\u0000"+
+		")\u0000\u0007\u0001\u0000\u0000\u0000\u0002\"\u0001\u0000\u0000\u0000"+
+		"\u0004\u0005\u0006\u0000\uffff\uffff\u0000\u0005\b\u0005\t\u0000\u0000"+
+		"\u0006\b\u0003\u0002\u0001\u0000\u0007\u0004\u0001\u0000\u0000\u0000\u0007"+
+		"\u0006\u0001\u0000\u0000\u0000\b\u0017\u0001\u0000\u0000\u0000\t\n\n\u0003"+
+		"\u0000\u0000\n\u0016\u0003\u0000\u0000\u0004\u000b\f\n\u0002\u0000\u0000"+
+		"\f\r\u0005\u0005\u0000\u0000\r\u0016\u0003\u0000\u0000\u0003\u000e\u000f"+
+		"\n\u0005\u0000\u0000\u000f\u0016\u0005\u0006\u0000\u0000\u0010\u0011\n"+
+		"\u0004\u0000\u0000\u0011\u0016\u0005\u0007\u0000\u0000\u0012\u0013\n\u0001"+
+		"\u0000\u0000\u0013\u0014\u0005\u0001\u0000\u0000\u0014\u0016\u0005\b\u0000"+
+		"\u0000\u0015\t\u0001\u0000\u0000\u0000\u0015\u000b\u0001\u0000\u0000\u0000"+
+		"\u0015\u000e\u0001\u0000\u0000\u0000\u0015\u0010\u0001\u0000\u0000\u0000"+
+		"\u0015\u0012\u0001\u0000\u0000\u0000\u0016\u0019\u0001\u0000\u0000\u0000"+
+		"\u0017\u0015\u0001\u0000\u0000\u0000\u0017\u0018\u0001\u0000\u0000\u0000"+
+		"\u0018\u0001\u0001\u0000\u0000\u0000\u0019\u0017\u0001\u0000\u0000\u0000"+
+		"\u001a\u001b\u0005\u0002\u0000\u0000\u001b\u001c\u0003\u0000\u0000\u0000"+
+		"\u001c\u001d\u0005\u0003\u0000\u0000\u001d#\u0001\u0000\u0000\u0000\u001e"+
+		"\u001f\u0005\u0004\u0000\u0000\u001f \u0003\u0000\u0000\u0000 !\u0005"+
+		"\u0003\u0000\u0000!#\u0001\u0000\u0000\u0000\"\u001a\u0001\u0000\u0000"+
+		"\u0000\"\u001e\u0001\u0000\u0000\u0000#\u0003\u0001\u0000\u0000\u0000"+
+		"\u0004\u0007\u0015\u0017\"";
 	public static final ATN _ATN =
 		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 	static {

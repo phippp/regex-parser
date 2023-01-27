@@ -38,6 +38,13 @@ public interface RegExVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitGroups(RegExParser.GroupsContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code optional}
+	 * labeled alternative in {@link RegExParser#regex}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitOptional(RegExParser.OptionalContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code concat}
 	 * labeled alternative in {@link RegExParser#regex}.
 	 * @param ctx the parse tree

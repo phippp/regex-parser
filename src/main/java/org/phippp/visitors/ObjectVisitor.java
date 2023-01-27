@@ -4,7 +4,8 @@ import org.phippp.antlr4.RegExBaseVisitor;
 import org.phippp.antlr4.RegExParser;
 import org.phippp.grammar.RegEx;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ObjectVisitor extends RegExBaseVisitor<RegEx> {
@@ -55,6 +56,12 @@ public class ObjectVisitor extends RegExBaseVisitor<RegEx> {
         RegEx[] children = {visit(ctx.main)};
         Integer term = counter.getAndAdd(1);
         return new RegEx(term, RegEx.Rule.PLUS, List.of(children), "");
+    }
+
+    @Override public RegEx visitOptional(RegExParser.OptionalContext ctx) {
+        RegEx[] children = {visit(ctx.main)};
+        Integer term = counter.getAndAdd(1);
+        return new RegEx(term, RegEx.Rule.OPTIONAL, List.of(children), "");
     }
 
     // ----------------------------- 2 additions ----------------------------- //

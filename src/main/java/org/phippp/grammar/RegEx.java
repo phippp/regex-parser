@@ -31,6 +31,7 @@ public class RegEx {
         String termString = String.join(getJoin(), terms);
         if(children.size() == 1) termString = "(" + termString + ")";
         if(rule == Rule.PLUS) termString += "+";
+        if(rule == Rule.OPTIONAL) termString += "?";
         builder.append(termString).append("\t").append(rule.toString());
         // we visit children via breadth first search
         // we don't want to revisit any references as they visited in the capture group
@@ -66,6 +67,6 @@ public class RegEx {
     }
 
     public enum Rule {
-        REFERENCE, CHARACTER, ALTERNATION, GROUPS, CONCAT, PLUS, SIMPLE_GROUP, NON_GROUP
+        REFERENCE, CHARACTER, ALTERNATION, OPTIONAL, GROUPS, CONCAT, PLUS, SIMPLE_GROUP, NON_GROUP
     }
 }
