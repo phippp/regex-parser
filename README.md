@@ -5,17 +5,18 @@ The plan is to then further optimize the result to make evaluation more effecien
 
 ## Syntax
 
-| Expression | Example |
-|--------------|--------|
-|Character | `[a-zA-Z]` |
-|Number | `[0-9]+` |
-|Concatenation| `abc` |
-|Plus Operator| `a+`|
-|Alternation (OR)| `x \| y` |
-|Concatenation | `abc` |
-|Non-Capturing group| `(?:re)`|
-|Capturing group| `(re)`|
-|Back references| `$NUMBER`|
+| Expression          | Example |
+|---------------------|--------|
+| Character           | `[a-zA-Z]` |
+| Number              | `[0-9]+` |
+| Concatenation       | `abc` |
+| Plus Operator       | `a+`|
+| One-or-none         | `a?`|
+| Alternation (OR)    | `x \| y` |
+| Concatenation       | `abc` |
+| Non-Capturing group | `(?:re)`|
+| Capturing group     | `(re)`|
+| Back references     | `$NUMBER`|
 
 ## Restrictions
 
