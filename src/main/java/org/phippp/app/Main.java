@@ -7,8 +7,10 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.phippp.antlr4.RegExLexer;
 import org.phippp.antlr4.RegExParser;
 import org.phippp.grammar.RegEx;
+import org.phippp.util.Optimizer;
 import org.phippp.visitors.ObjectVisitor;
 
+import java.util.List;
 import java.util.Scanner;
 
 public class Main {
@@ -24,6 +26,9 @@ public class Main {
 
         RegEx re = new ObjectVisitor().visit(tree);
 
+        Optimizer.optimize(re, Optimizer.CONCAT);
+
+        System.out.println("-------------------");
         System.out.println(re.toString());
     }
 }

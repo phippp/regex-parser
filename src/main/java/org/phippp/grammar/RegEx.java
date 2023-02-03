@@ -2,8 +2,14 @@ package org.phippp.grammar;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class RegEx {
+
+    public static final Predicate<RegEx> finral = r -> r.terminal;
+    public static final Predicate<RegEx> concat = r -> r.rule == Rule.CONCAT && r.children.stream().anyMatch(finral);
+    public static final Function<RegEx, String> mapper = r -> r.text;
 
     private final Integer term;
     private final Rule rule;
@@ -63,6 +69,52 @@ public class RegEx {
             for(RegEx child : this.children)
                 result.addAll(child.traverse());
         result.add(this);
+        return result;
+    }
+
+    /**
+     * Method to create a list of all the regex instances within the
+     * tree that also match a certain rule.
+     */
+
+    public List<RegEx> find(Predicate<RegEx> predicate) {
+        return this.traverse()
+                .stream()
+                .filter(predicate)
+                .toList();
+    }
+
+    /**
+     * Method to check if a RegEx is inside another already.
+     */
+
+    public boolean hasChild(RegEx r){
+        return this.children.contains(r);
+    }
+
+    /**
+     * Overwritten equals and hashcode functions so .equals() can be
+     * used accurately and as desired. Both were generated using
+     * intelliJ IDEA default settings.
+     */
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        RegEx regEx = (RegEx) o;
+
+        if (terminal != regEx.terminal) return false;
+        if (!term.equals(regEx.term)) return false;
+        return rule == regEx.rule;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = term.hashCode();
+        result = 31 * result + rule.hashCode();
+        result = 31 * result + (terminal ? 1 : 0);
         return result;
     }
 
