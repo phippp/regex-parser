@@ -4,11 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class RegEx {
 
     public static final Predicate<RegEx> finral = r -> r.terminal;
     public static final Predicate<RegEx> concat = r -> r.rule == Rule.CONCAT && r.children.stream().anyMatch(finral);
+    public static final Predicate<RegEx> asta = r -> concat.test(r) || finral.test(r);
+    public static final Predicate<RegEx> none = r -> false;
+    public static final Predicate<RegEx> all = r -> true;
     public static final Function<RegEx, String> mapper = r -> r.text;
 
     private final Integer term;
@@ -61,14 +65,29 @@ public class RegEx {
      * Method to create a list of all the regex instances within the
      * tree. This allows us to extract information more easily from a list
      * using streams.
+     * Using other methods, the first param refers to the rule for returning
+     * an instance of an object. The second refers to which children to explore.
      */
 
     public List<RegEx> traverse() {
+        // visit all nodes, return all nodes
+        return traverse(all, all);
+    }
+
+    public List<RegEx> traverse(Predicate<RegEx> condition) {
+        // return nodes matching condition, but visit all nodes
+        return traverse(condition, all);
+    }
+
+    public List<RegEx> traverse(Predicate<RegEx> parent, Predicate<RegEx> child) {
+        // returns nodes matching parent, visit only nodes that match child
         List<RegEx> result = new ArrayList<>();
         if(!this.terminal && this.children != null && !this.children.isEmpty())
-            for(RegEx child : this.children)
-                result.addAll(child.traverse());
-        result.add(this);
+            for(RegEx c : this.children)
+                if(child.test(c))
+                    result.addAll(c.traverse(parent, child));
+        if(parent.test(this))
+            result.add(this);
         return result;
     }
 
@@ -90,6 +109,24 @@ public class RegEx {
 
     public boolean hasChild(RegEx r){
         return this.children.contains(r);
+    }
+
+    public boolean isTerminal() { return this.terminal; }
+
+    /**
+     * Alternative to toString that gives a basic description of the
+     * node, useful for debugging.
+     */
+
+    public String describe() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("Term : ").append(this.term)
+                .append("\nRule : ").append(this.rule.toString());
+        if(this.children != null && !this.children.isEmpty())
+                builder.append("\nChildren : ").append(this.children.stream().map(r -> String.valueOf(r.term)).collect(Collectors.joining(", ")));
+        if(this.terminal)
+            builder.append("Terminal : ").append(this.text);
+        return builder.toString();
     }
 
     /**

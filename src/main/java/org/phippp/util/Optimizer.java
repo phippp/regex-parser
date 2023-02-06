@@ -19,14 +19,17 @@ public class Optimizer {
     public static void concat(RegEx r) {
         // get all nodes that are CONCAT and have TERMINAL child, without this it's not safe to
         // concat a string.
-        List<RegEx> list = r.find(RegEx.concat);
+        List<RegEx> list = r.traverse(RegEx.concat);
         // calculate which nodes are the highest up the tree, instead of merging lots of individual nodes
         // we will attempt to merge all in one go.
-        for(int i = list.size() - 1; i >= 0; i--){
+        for(int i = 0; i < list.size(); i++){
             RegEx re = list.get(i);
-            if(!((i - 1) >= 0 && r.hasChild(list.get(i - 1)))) continue;
+            // we skip any nodes that have their parents in the list to get us all root nodes for the strings
+            if((i + 1) < list.size() && list.get(i + 1).hasChild(re)) continue;
+            if((i + 2) < list.size() && list.get(i + 2).hasChild(re) && re.isTerminal()) continue;
             System.out.println("---------" + (i) + "---------");
-            System.out.println(re.find(RegEx.finral).stream().map(RegEx.mapper).collect(Collectors.joining()));
+            System.out.println(re.describe());
+            System.out.println(re.traverse(RegEx.finral, RegEx.asta).stream().map(RegEx.mapper).collect(Collectors.joining()));
         }
     }
 
