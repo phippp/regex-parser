@@ -26,12 +26,15 @@ public class Main {
 
         // use JCommander to load params
         Args arguments = new Args();
-        JCommander.newBuilder()
+        JCommander cmd = JCommander.newBuilder()
                 .addObject(arguments)
-                .build()
-                .parse(args);
-
-        LOG.info(arguments.file + " " + arguments.title + " " + arguments.rough);
+                .build();
+        cmd.parse(args);
+        // add usage when passed with -h or --help flag
+        if(arguments.help){
+            cmd.usage();
+            return;
+        }
 
         Scanner scanner = new Scanner(System.in);
         System.out.print("RegEx please: ");
@@ -44,7 +47,9 @@ public class Main {
 
         RegEx re = new ObjectVisitor().visit(tree);
 
-        re = Optimizer.optimize(re, Optimizer.CONCAT);
+        re = Optimizer.optimize(re, getOptimizations(arguments));
+
+        LOG.info(re.toString(true));
 
         try {
             String location = Renderer.makeGraph(re.traverse(), arguments.rough, arguments.title, arguments.file);
@@ -53,5 +58,14 @@ public class Main {
             LOG.error(e);
         }
 
+    }
+
+    protected static byte getOptimizations(Args args) {
+        if(args.all) return (byte)(Optimizer.CONCAT | Optimizer.SIMPLIFY | Optimizer.ORDER);
+        byte opt = 0;
+        if(args.reorder) opt |= Optimizer.ORDER;
+        if(args.simplify) opt |= Optimizer.SIMPLIFY;
+        if(args.concat) opt |= Optimizer.CONCAT;
+        return opt;
     }
 }

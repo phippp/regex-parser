@@ -1,5 +1,6 @@
 package org.phippp.grammar;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -8,6 +9,8 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
+import static org.phippp.logic.Parts.*;
 
 public class RegEx {
 
@@ -20,9 +23,15 @@ public class RegEx {
     public static final Function<RegEx, RegEx> SHRINK = r -> {
         boolean below = !r.left.terminal;
         String str = (below ? r.left.right.text : r.left.text) + r.right.text;
-        if(!below) return RegEx.makeTerminal(r, str);
-        RegEx[] children = {r.left.left, RegEx.makeTerminal(r.right, str)};
+        if(!below) return RegEx.makeTerminal(r, Rule.CHARACTER, str);
+        RegEx[] children = {r.left.left, RegEx.makeTerminal(r.right, Rule.CHARACTER, str)};
         return r.replaceChildren(children);
+    };
+    public static final Predicate<RegEx> EXTENDED_PLUS = r -> {
+        return (r.rule == Rule.PLUS || r.rule == Rule.OPTIONAL) && r.left.terminal;
+    };
+    public static final Function<RegEx, RegEx> SIMPLIFY = r -> {
+        return RegEx.makeTerminal(r, r.rule, r.left.text);
     };
 
     private final Integer term;
@@ -32,10 +41,10 @@ public class RegEx {
     private boolean terminal;
     private final String text;
 
-    public RegEx(Integer term, String text) {
+    public RegEx(Integer term, Rule rule, String text) {
         this.term = term;
         this.text = text;
-        this.rule = Rule.CHARACTER;
+        this.rule = rule;
         this.terminal = true;
     }
 
@@ -49,8 +58,8 @@ public class RegEx {
         this.text = "";
     }
 
-    public static RegEx makeTerminal(RegEx r, String str) {
-        return new RegEx(r.term, str);
+    public static RegEx makeTerminal(RegEx r, Rule rule, String str) {
+        return new RegEx(r.term, rule, str);
     }
 
     public RegEx replaceChildren(RegEx... children){
@@ -86,27 +95,35 @@ public class RegEx {
         return result;
     }
 
+    public String toString(boolean start){
+        List<String> variables = this.traverse().stream()
+                .map(RegEx::getVariable).toList();
+        return EXISTS + String.join(", ", variables) + ": (" + this + ")";
+    }
+
     @Override
     public String toString(){
         // we return early if it's a character
+        Pair<Boolean, String> special = getSpecial();
         if(terminal)
-            return "x_" + term + " := " + text;
+            return special.getLeft() ? getVariable() + DOT_EQ + text
+                    : getVariable() + IN + text + special.getRight();
         // we make a list of all terms included in the expression
-        List<String> terms = getChildren().stream().map(r -> "x_" + r.term).toList();
+        List<String> terms = getChildren().stream()
+                .map(RegEx::getVariable).toList();
         // we start building return string
-        StringBuilder builder = new StringBuilder("x_" + term + " := ");
-        String termString = String.join(getJoin(), terms);
-        if(getChildren().size() == 1) termString = "(" + termString + ")";
-        if(rule == Rule.PLUS) termString += "+";
-        if(rule == Rule.OPTIONAL) termString += "?";
-        builder.append(termString).append("\t").append(rule.toString());
-        // we visit children via breadth first search
-        // we don't want to revisit any references as they visited in the capture group
+        StringBuilder builder = new StringBuilder(getVariable() + (special.getLeft() ? DOT_EQ : IN));
+
+        String termString = (special.getLeft())
+                ? String.join(special.getRight(), terms)
+                : terms.get(0) + special.getRight();
+        builder.append(termString);
+
         List<RegEx> visitable = this.rule == Rule.REFERENCE
                 ? this.getChildren().subList(0, 1)
                 : this.getChildren();
         for(RegEx r : visitable)
-            builder.append("\n").append(r.toString());
+            builder.append(AND).append(r.toString());
         return builder.toString();
     }
 
@@ -193,12 +210,18 @@ public class RegEx {
      * a separate function.
      */
 
-    private String getJoin(){
+    private Pair<Boolean, String> getSpecial(){
         return switch (this.rule) {
-            case REFERENCE, CONCAT -> ".";
-            case ALTERNATION -> "|";
-            default -> "";
+            case REFERENCE, CONCAT -> Pair.of(true, ".");
+            case ALTERNATION -> Pair.of(true, "|");
+            case OPTIONAL -> Pair.of(false, "?");
+            case PLUS -> Pair.of(false, "+");
+            default -> Pair.of(true, "");
         };
+    }
+
+    private String getVariable(){
+        return "x_" + this.term;
     }
 
     public enum Rule {

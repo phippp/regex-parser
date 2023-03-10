@@ -25,7 +25,7 @@ public class ObjectVisitor extends RegExBaseVisitor<RegEx> {
 
     @Override public RegEx visitCharacter(RegExParser.CharacterContext ctx) {
         int term = counter.getAndAdd(1);
-        return new RegEx(term, ctx.getText());
+        return new RegEx(term, RegEx.Rule.CHARACTER, ctx.getText());
     }
 
     @Override public RegEx visitGroups(RegExParser.GroupsContext ctx) {

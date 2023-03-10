@@ -13,4 +13,18 @@ public class Args {
     @Parameter(names={"--title", "-t"}, description="Title of the graphviz image")
     public String title = "";
 
+    @Parameter(names={"-a"}, description="All optimizations will be used, equivalent to -cso flags")
+    public boolean all = false;
+
+    @Parameter(names={"--concat", "--concatenation", "-c"}, description="Concatenation optimization")
+    public boolean concat = false;
+
+    @Parameter(names={"--simplify", "-s"}, description="Simplification optimization")
+    public boolean simplify = false;
+
+    @Parameter(names={"--reorder", "-o"}, description="Reorder variables to ascend rather than descend")
+    public boolean reorder = false;
+
+    @Parameter(names={"--help", "-h"}, help = true)
+    public boolean help = false;
 }
