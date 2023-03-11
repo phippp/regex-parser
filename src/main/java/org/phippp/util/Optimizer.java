@@ -19,10 +19,10 @@ public class Optimizer {
     public static RegEx optimize(RegEx r, byte options){
         if((options & CONCAT) > 0)
             r = concat(r);
-        if((options & ORDER) > 0)
-            r = order(r);
         if((options & SIMPLIFY) > 0)
             r = simplify(r);
+        if((options & ORDER) > 0)
+            r = order(r);
         return r;
     }
 
@@ -38,7 +38,10 @@ public class Optimizer {
     }
 
     protected static RegEx order(RegEx r) {
-        return r;
+        LOG.info("Starting re-ordering of variables");
+        // replace first node with 0 then iterate
+        r = new RegEx(0, r);
+        return r.traverseBreadthAndDo(RegEx.ALL, RegEx.REORDER);
     }
 
 }

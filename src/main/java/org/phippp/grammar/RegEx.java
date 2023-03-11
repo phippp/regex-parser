@@ -33,6 +33,14 @@ public class RegEx {
     public static final Function<RegEx, RegEx> SIMPLIFY = r -> {
         return RegEx.makeTerminal(r, r.rule, r.left.text);
     };
+    public static final Function<RegEx, RegEx> REORDER = r -> {
+        if(r.terminal) return r;
+        Integer leftNodes = r.left.traverse().size() + 1;
+        RegEx[] children = (r.right != null)
+                ? new RegEx[]{new RegEx(r.term + 1, r.left), new RegEx(r.term + leftNodes, r.right)}
+                : new RegEx[]{new RegEx(r.term + 1, r.left)};
+        return r.replaceChildren(children);
+    };
 
     private final Integer term;
     private final Rule rule;
@@ -56,6 +64,15 @@ public class RegEx {
         this.left = !this.terminal ? children[0] : null;
         this.right = children.length == 2 ? children[1] : null;
         this.text = "";
+    }
+
+    public RegEx(Integer term, RegEx r){
+        this.term = term;
+        this.text = r.text;
+        this.rule = r.rule;
+        this.left = r.left;
+        this.right = r.right;
+        this.terminal = r.terminal;
     }
 
     public static RegEx makeTerminal(RegEx r, Rule rule, String str) {
@@ -180,6 +197,15 @@ public class RegEx {
         this.replaceChildren(children);
 
         return cond.test(this) ? func.apply(this) : this;
+    }
+
+    public RegEx traverseBreadthAndDo(Predicate<RegEx> cond, Function<RegEx, RegEx> func) {
+        RegEx clone = cond.test(this) ? func.apply(this) : this;
+        RegEx[] children = new RegEx[clone.getChildren().size()];
+        if (clone.left != null) children[0] = clone.left.traverseBreadthAndDo(cond, func);
+        if (clone.right != null) children[1] = clone.right.traverseBreadthAndDo(cond, func);
+        clone.replaceChildren(children);
+        return clone;
     }
 
     /**
