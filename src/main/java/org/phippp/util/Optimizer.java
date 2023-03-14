@@ -14,6 +14,8 @@ public class Optimizer {
     public static final byte SIMPLIFY = 2;
     // will invert terms to start with 0 at top and also make sure there are no gaps
     public static final byte ORDER = 4;
+    // will remove the definition of any duplicate nodes i.e. 'ab' in 'abc+ab'
+    public static final byte DUPLICATES = 8;
 
 
     public static RegEx optimize(RegEx r, byte options){

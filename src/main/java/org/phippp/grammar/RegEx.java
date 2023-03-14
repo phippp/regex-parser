@@ -5,6 +5,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -114,6 +115,7 @@ public class RegEx {
 
     public String toString(boolean start){
         List<String> variables = this.traverse().stream()
+                .sorted(Comparator.comparingInt(RegEx::getTerm))
                 .map(RegEx::getVariable).toList();
         return EXISTS + String.join(", ", variables) + ": (" + this + ")";
     }
