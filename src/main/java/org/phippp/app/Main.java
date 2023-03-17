@@ -10,6 +10,7 @@ import org.apache.logging.log4j.Logger;
 import org.phippp.antlr4.RegExLexer;
 import org.phippp.antlr4.RegExParser;
 import org.phippp.grammar.RegEx;
+import org.phippp.logic.Conjunctive;
 import org.phippp.util.Optimizer;
 import org.phippp.util.Renderer;
 import org.phippp.visitors.ObjectVisitor;
@@ -52,7 +53,15 @@ public class Main {
         LOG.info(re.toString(true));
 
         try {
-            String location = Renderer.makeGraph(re.traverse(), arguments.rough, arguments.title, arguments.file);
+            String location = Renderer.makeGrammarGraph(re.traverse(), arguments.rough, arguments.title, arguments.file);
+            LOG.info("File saved! " + location);
+        } catch (IOException e){
+            LOG.error(e);
+        }
+
+        try{
+            Conjunctive.Node node = Conjunctive.fromRegEx(re);
+            String location = Renderer.makeConjunctiveGraph(node);
             LOG.info("File saved! " + location);
         } catch (IOException e){
             LOG.error(e);
@@ -63,8 +72,8 @@ public class Main {
     protected static byte getOptimizations(Args args) {
         if(args.all) return (byte)(Optimizer.CONCAT | Optimizer.SIMPLIFY | Optimizer.ORDER);
         byte opt = 0;
-        if(args.reorder) opt |= Optimizer.ORDER;
-        if(args.simplify) opt |= Optimizer.SIMPLIFY;
+        if(args.reorder || args.gyo) opt |= Optimizer.ORDER;
+        if(args.simplify || args.gyo) opt |= Optimizer.SIMPLIFY;
         if(args.concat) opt |= Optimizer.CONCAT;
         return opt;
     }

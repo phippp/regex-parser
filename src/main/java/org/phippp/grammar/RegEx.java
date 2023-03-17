@@ -3,10 +3,12 @@ package org.phippp.grammar;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.phippp.logic.Conjunctive;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -83,7 +85,7 @@ public class RegEx {
     public RegEx replaceChildren(RegEx... children){
         this.terminal = children.length == 0;
         this.left = !this.terminal ? children[0] : null;
-        this.right = children.length == 2 ? children[1] : null;
+        this.right = children.length > 1 ? children[1] : null;
         return this;
     }
 
@@ -111,6 +113,15 @@ public class RegEx {
         result = 31 * result + rule.hashCode();
         result = 31 * result + (terminal ? 1 : 0);
         return result;
+    }
+
+    public String toConjunctive(Conjunctive.Type type){
+        if(type == Conjunctive.Type.FILTER) {
+            String symbol = (rule == Rule.CHARACTER) ? DOT_EQ : IN;
+            return getVariable() + symbol + text + getSpecial().getRight();
+        }
+        String t = term == 0 ? "w" : getVariable();
+        return t + DOT_EQ + String.join("", getChildren().stream().map(RegEx::getVariable).toList());
     }
 
     public String toString(boolean start){
@@ -208,6 +219,21 @@ public class RegEx {
         if (clone.right != null) children[1] = clone.right.traverseBreadthAndDo(cond, func);
         clone.replaceChildren(children);
         return clone;
+    }
+
+    public Conjunctive.Node toNode() {
+        // need to work out which group we are in...
+        if(terminal)
+            return new Conjunctive.Node(Conjunctive.Type.FILTER, this);
+        // wxx or wxy
+        if(term == 0){
+            Conjunctive.Type type = (Objects.equals(left.term, right.term))
+                    ? Conjunctive.Type.WXX : Conjunctive.Type.WXY;
+            return new Conjunctive.Node(type, this);
+        }
+        Conjunctive.Type type = (Objects.equals(left.term, right.term))
+                ? Conjunctive.Type.XYY : Conjunctive.Type.XYZ;
+        return new Conjunctive.Node(type, this);
     }
 
     /**

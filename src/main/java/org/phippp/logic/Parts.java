@@ -13,6 +13,7 @@ public class Parts {
     public static final String DOT_EQ = " = "; //'\u2250';
     public static final String AND = " AND "; //'\u2227';
     public static final String EXISTS = "EXISTS "; //'\u2203';
+    public static final String JOIN = "JOIN"; //'\u22c8';
 
     @Deprecated
     public static String constructTerminal(int curr, String value){

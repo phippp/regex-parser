@@ -3,6 +3,7 @@ package org.phippp.util;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.phippp.grammar.RegEx;
+import org.phippp.logic.Conjunctive;
 
 public class Optimizer {
 
@@ -44,6 +45,15 @@ public class Optimizer {
         // replace first node with 0 then iterate
         r = new RegEx(0, r);
         return r.traverseBreadthAndDo(RegEx.ALL, RegEx.REORDER);
+    }
+
+
+    public static Conjunctive optimize(Conjunctive c) {
+        return c;
+    }
+
+    protected static Conjunctive gyoReduction(Conjunctive c) {
+        return c;
     }
 
 }
