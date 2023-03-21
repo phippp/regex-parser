@@ -12,6 +12,7 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.phippp.logic.Parts.*;
 
@@ -21,7 +22,7 @@ public class RegEx {
 
     public static final Predicate<RegEx> ALL = r -> true;
     public static final Predicate<RegEx> SHRINKABLE = r -> {
-        return r.rule == Rule.CONCAT && r.right.terminal && r.left.rule != Rule.SIMPLE_GROUP && (r.left.terminal || r.left.right.terminal);
+        return (r.rule == Rule.CONCAT || r.rule == Rule.REFERENCE) && r.right.terminal && r.left.rule != Rule.SIMPLE_GROUP && (r.left.terminal || r.left.right.terminal);
     };
     public static final Function<RegEx, RegEx> SHRINK = r -> {
         boolean below = !r.left.terminal;
@@ -30,7 +31,7 @@ public class RegEx {
         RegEx[] children = {r.left.left, RegEx.makeTerminal(r.right, Rule.CHARACTER, str)};
         return r.replaceChildren(children);
     };
-    public static final Predicate<RegEx> EXTENDED_PLUS = r -> {
+    public static final Predicate<RegEx> EXTENDED_PLUS_OPTIONAL = r -> {
         return (r.rule == Rule.PLUS || r.rule == Rule.OPTIONAL) && r.left.terminal;
     };
     public static final Function<RegEx, RegEx> SIMPLIFY = r -> {
@@ -43,6 +44,10 @@ public class RegEx {
                 ? new RegEx[]{new RegEx(r.term + 1, r.left), new RegEx(r.term + leftNodes, r.right)}
                 : new RegEx[]{new RegEx(r.term + 1, r.left)};
         return r.replaceChildren(children);
+    };
+    public static final Predicate<RegEx> IS_GROUP = r -> { return r.rule == Rule.SIMPLE_GROUP; };
+    public static final Function<RegEx, RegEx> SKIP = r -> {
+        return r.left;
     };
 
     private final Integer term;
@@ -89,32 +94,6 @@ public class RegEx {
         return this;
     }
 
-    /**
-     * Overwritten equals and hashcode functions so .equals() can be
-     * used accurately and as desired. Both were generated using
-     * intelliJ IDEA default settings.
-     */
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        RegEx regEx = (RegEx) o;
-
-        if (terminal != regEx.terminal) return false;
-        if (!term.equals(regEx.term)) return false;
-        return rule == regEx.rule;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = term.hashCode();
-        result = 31 * result + rule.hashCode();
-        result = 31 * result + (terminal ? 1 : 0);
-        return result;
-    }
-
     public String toConjunctive(Conjunctive.Type type){
         if(type == Conjunctive.Type.FILTER) {
             String symbol = (rule == Rule.CHARACTER) ? DOT_EQ : IN;
@@ -125,7 +104,8 @@ public class RegEx {
     }
 
     public String toString(boolean start){
-        List<String> variables = this.traverse().stream()
+        List<String> variables = Stream.of(this, left, right)
+                .filter(Objects::nonNull)
                 .sorted(Comparator.comparingInt(RegEx::getTerm))
                 .map(RegEx::getVariable).toList();
         return EXISTS + String.join(", ", variables) + ": (" + this + ")";
@@ -152,8 +132,13 @@ public class RegEx {
         List<RegEx> visitable = this.rule == Rule.REFERENCE
                 ? this.getChildren().subList(0, 1)
                 : this.getChildren();
-        for(RegEx r : visitable)
-            builder.append(AND).append(r.toString());
+        for(RegEx r : visitable) {
+            builder.append(AND);
+            List<String> f = r.getChildren().stream().map(RegEx::getVariable).toList();
+            if(f.size() > 0)
+                builder.append(EXISTS).append(String.join(", ", f)).append(": ");
+            builder.append("(").append(r).append(")");
+        }
         return builder.toString();
     }
 
@@ -276,6 +261,24 @@ public class RegEx {
 
     private String getVariable(){
         return "x_" + this.term;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        RegEx regEx = (RegEx) o;
+
+        if (!term.equals(regEx.term)) return false;
+        return rule == regEx.rule;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = term.hashCode();
+        result = 31 * result + rule.hashCode();
+        return result;
     }
 
     public enum Rule {

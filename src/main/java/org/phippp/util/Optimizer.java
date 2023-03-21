@@ -5,6 +5,8 @@ import org.apache.logging.log4j.Logger;
 import org.phippp.grammar.RegEx;
 import org.phippp.logic.Conjunctive;
 
+import java.util.List;
+
 public class Optimizer {
 
     public static final Logger LOG = LogManager.getLogger(Optimizer.class);
@@ -20,13 +22,19 @@ public class Optimizer {
 
 
     public static RegEx optimize(RegEx r, byte options){
-        if((options & CONCAT) > 0)
+        r = dropGroups(r);
+        if ((options & CONCAT) > 0)
             r = concat(r);
-        if((options & SIMPLIFY) > 0)
+        if ((options & SIMPLIFY) > 0)
             r = simplify(r);
-        if((options & ORDER) > 0)
-            r = order(r);
+        // removed due to issue with incorrect indexing for back-references
+//        if ((options & ORDER) > 0)
+//            r = order(r);
         return r;
+    }
+
+    protected static RegEx dropGroups(RegEx r) {
+        return r.traverseAndDo(RegEx.IS_GROUP, RegEx.SKIP);
     }
 
     protected static RegEx concat(RegEx r)  {
@@ -37,7 +45,7 @@ public class Optimizer {
 
     protected static RegEx simplify(RegEx r) {
         LOG.info("Starting simplifying nodes");
-        return r.traverseAndDo(RegEx.EXTENDED_PLUS, RegEx.SIMPLIFY);
+        return r.traverseAndDo(RegEx.EXTENDED_PLUS_OPTIONAL, RegEx.SIMPLIFY);
     }
 
     protected static RegEx order(RegEx r) {
@@ -48,11 +56,12 @@ public class Optimizer {
     }
 
 
-    public static Conjunctive optimize(Conjunctive c) {
-        return c;
+    public static Conjunctive.Node optimize(Conjunctive.Node c) {
+        return gyoReduction(c);
     }
 
-    protected static Conjunctive gyoReduction(Conjunctive c) {
+    protected static Conjunctive.Node gyoReduction(Conjunctive.Node c) {
+        List<Conjunctive.Node> parts = c.getParts();
         return c;
     }
 

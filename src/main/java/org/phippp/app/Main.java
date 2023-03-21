@@ -37,36 +37,23 @@ public class Main {
             return;
         }
 
-        Scanner scanner = new Scanner(System.in);
-        System.out.print("RegEx please: ");
-        String userinput = scanner.nextLine();
-        CharStream input = CharStreams.fromString(userinput);
-        RegExLexer lexer = new RegExLexer(input);
-        CommonTokenStream tokens = new CommonTokenStream(lexer);
-        RegExParser parser = new RegExParser(tokens);
-        ParseTree tree = parser.regex();
+        // load inputs and parse grammar
+        String input = getInput(arguments);
+        if(arguments.verbose) System.out.println(input);
+        CharStream stream = CharStreams.fromString(input);
+        RegEx re = parse(stream);
+        LOG.info("BEFORE OPTIMIZATION:\n" + re.toString(true));
 
-        RegEx re = new ObjectVisitor().visit(tree);
-
+        // optimize
         re = Optimizer.optimize(re, getOptimizations(arguments));
+        LOG.info("AFTER OPTIMIZATION:\n" + re.toString(true));
 
-        LOG.info(re.toString(true));
+        // convert
+        Conjunctive.Node conj = Conjunctive.fromRegEx(re);
 
-        try {
-            String location = Renderer.makeGrammarGraph(re.traverse(), arguments.rough, arguments.title, arguments.file);
-            LOG.info("File saved! " + location);
-        } catch (IOException e){
-            LOG.error(e);
-        }
-
-        try{
-            Conjunctive.Node node = Conjunctive.fromRegEx(re);
-            String location = Renderer.makeConjunctiveGraph(node);
-            LOG.info("File saved! " + location);
-        } catch (IOException e){
-            LOG.error(e);
-        }
-
+        // visualize
+        render(arguments, re);
+        render(arguments, conj);
     }
 
     protected static byte getOptimizations(Args args) {
@@ -76,5 +63,40 @@ public class Main {
         if(args.simplify || args.gyo) opt |= Optimizer.SIMPLIFY;
         if(args.concat) opt |= Optimizer.CONCAT;
         return opt;
+    }
+
+    protected static String getInput(Args args) {
+        if(args.input != null) return args.input;
+        // read input from console
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("RegEx:");
+        return scanner.nextLine();
+    }
+
+    protected static RegEx parse(CharStream stream) {
+        RegExLexer lexer = new RegExLexer(stream);
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        RegExParser parser = new RegExParser(tokens);
+        ParseTree tree = parser.regex();
+        return new ObjectVisitor().visit(tree);
+    }
+
+    protected static void render(Args args, RegEx r) {
+        try{
+            String location = Renderer.makeGrammarGraph(r.traverse(), args.rough, args.title, args.file);
+            LOG.info("File saved! " + location);
+        } catch (IOException e){
+            LOG.fatal(e);
+        }
+    }
+
+    protected static void render(Args args, Conjunctive.Node conj){
+        try{
+            conj = Optimizer.optimize(conj);
+            String location = Renderer.makeConjunctiveGraph(conj, args.rough, args.title, args.file);
+            LOG.info("File saved! " + location);
+        } catch (IOException e){
+            LOG.fatal(e);
+        }
     }
 }

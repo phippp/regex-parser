@@ -9,18 +9,15 @@ import guru.nidi.graphviz.model.LinkSource;
 import guru.nidi.graphviz.rough.Roughifyer;
 import org.phippp.grammar.RegEx;
 import org.phippp.logic.Conjunctive;
-import org.phippp.logic.Parts;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static guru.nidi.graphviz.model.Factory.*;
 
 public class Renderer {
 
-    private static final SimpleDateFormat FORMATTER = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private static final GraphvizProcessor PROCESSOR = new Roughifyer().bowing(2).curveStepCount(6).roughness(1).font("*serif", "Comic Sans MS");
 
     public static List<LinkSource> makeLinks(List<RegEx> regexes) {
@@ -68,19 +65,12 @@ public class Renderer {
         return sources;
     }
 
-    public static String makeGrammarGraph(List<RegEx> r, boolean rough) throws IOException {
-        return makeGrammarGraph(r, rough, "", FORMATTER.format(new Date()));
-    }
-
-    public static String makeGrammarGraph(List<RegEx> r, boolean rough, String... params) throws IOException {
-        // assume that array has graph name and file name
+    protected static String makeGraph(List<LinkSource> sources, boolean rough, String... params) throws IOException {
         if(params.length < 2) throw new InvalidPropertiesFormatException("Expected at least 2 parameters");
 
         File output = new File(params[1]);
 
-        Graph g = graph(params[0]).directed().with(
-                makeLinks(r)
-        );
+        Graph g = graph(params[0]).directed().with(sources);
 
         Graphviz graphviz = Graphviz.fromGraph(g);
 
@@ -93,25 +83,16 @@ public class Renderer {
         return output.getAbsolutePath();
     }
 
-    public static String makeConjunctiveGraph(Conjunctive.Node node) throws IOException {
-        // assume that array has graph name and file name
-//        if(params.length < 2) throw new InvalidPropertiesFormatException("Expected at least 2 parameters");
+    public static String makeGrammarGraph(List<RegEx> r, boolean rough, String... params) throws IOException {
+        List<LinkSource> sources = makeLinks(r);
+        return makeGraph(sources, rough, params);
+    }
 
-//        File output = new File(params[1]);
-        File output = new File("images/lol.png");
-
-        Graph g = graph("").directed().with(
-                makeLinks(node)
-        );
-
-        Graphviz graphviz = Graphviz.fromGraph(g);
-
-//        if (rough) graphviz =  graphviz.processor(PROCESSOR);
-
-        graphviz.width(1024)
-                .render(Format.PNG)
-                .toFile(output);
-
-        return output.getAbsolutePath();
+    public static String makeConjunctiveGraph(Conjunctive.Node node, boolean rough, String... params) throws IOException {
+        List<LinkSource> sources = makeLinks(node);
+        params[1] = params[1].toLowerCase().endsWith(".png")
+                ? params[1].replace(".png", "_conj.png")
+                : params[1] + "_conj";
+        return makeGraph(sources, rough, params);
     }
 }

@@ -14,7 +14,7 @@ public class Conjunctive {
     private static final Logger LOG = LogManager.getLogger(Conjunctive.class);
 
     public static Node fromRegEx(RegEx r){
-        List<Node> nodes = new ArrayList<>(r.traverse().stream().map(RegEx::toNode).toList());
+        List<Node> nodes = new ArrayList<>(r.traverse().stream().distinct().map(RegEx::toNode).toList());
         Collections.reverse(nodes);
         Node n = Node.newJoin(nodes.get(0), null);
         // we keep this the original object, so we can return the root
@@ -73,6 +73,10 @@ public class Conjunctive {
 
         public RegEx getFrom(){
             return this.from;
+        }
+
+        public List<Node> getParts() {
+            return this.toList().stream().filter(n -> !n.isJoin()).toList();
         }
 
         public Node addNode(Node n){

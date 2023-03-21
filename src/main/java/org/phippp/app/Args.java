@@ -28,6 +28,15 @@ public class Args {
     @Parameter(names={"--gyo", "-g"}, description="Perform GYO optimization, requires -so, will automatically use flag.")
     public boolean gyo = false;
 
+    @Parameter(names={"--verbose", "-v"}, description="Include extra outputs in the command line")
+    public boolean verbose = false;
+
+    @Parameter(names={"-i", "--input"}, description="The RegEx formula")
+    public String input = null;
+
+    @Parameter(names={"-q", "--query"}, description="The string to test against the value from -i")
+    public String query = null;
+
     @Parameter(names={"--help", "-h"}, help = true)
     public boolean help = false;
 }
