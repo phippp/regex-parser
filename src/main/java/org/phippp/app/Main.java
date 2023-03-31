@@ -5,12 +5,15 @@ import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.phippp.antlr4.RegExLexer;
 import org.phippp.antlr4.RegExParser;
 import org.phippp.grammar.RegEx;
+import org.phippp.logic.Acyclic;
 import org.phippp.logic.Conjunctive;
+import org.phippp.logic.Spanner;
 import org.phippp.util.Optimizer;
 import org.phippp.util.Renderer;
 import org.phippp.visitors.ObjectVisitor;
@@ -50,6 +53,12 @@ public class Main {
 
         // convert
         Conjunctive.Node conj = Conjunctive.fromRegEx(re);
+        Spanner spanner = Spanner.fromRegEx(re);
+        Pair<Boolean, Acyclic.Graph<Integer>> acyclic = Acyclic.bracket(spanner);
+        LOG.info(acyclic.getLeft() ? "IS" : "ISN'T");
+        if(acyclic.getLeft())
+            Acyclic.tree(spanner, acyclic.getRight());
+        LOG.info(spanner);
 
         // visualize
         render(arguments, re);

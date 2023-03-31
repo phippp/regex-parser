@@ -22,7 +22,7 @@ public class RegEx {
 
     public static final Predicate<RegEx> ALL = r -> true;
     public static final Predicate<RegEx> SHRINKABLE = r -> {
-        return (r.rule == Rule.CONCAT || r.rule == Rule.REFERENCE) && r.right.terminal && r.left.rule != Rule.SIMPLE_GROUP && (r.left.terminal || r.left.right.terminal);
+        return (r.rule == Rule.CONCAT || r.rule == Rule.REFERENCE) && r.right.terminal && r.left.rule != Rule.SIMPLE_GROUP && (r.left.terminal || (r.left.right != null && r.left.right.terminal) );
     };
     public static final Function<RegEx, RegEx> SHRINK = r -> {
         boolean below = !r.left.terminal;

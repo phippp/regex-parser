@@ -20,9 +20,7 @@ public class Conjunctive {
         // we keep this the original object, so we can return the root
         final Node start = n;
         for(int i = 1; i < nodes.size(); i++){
-            LOG.info(nodes.get(i).getFrom().describe());
             n = n.addNode(nodes.get(i));
-            LOG.info(n);
         }
         return start;
     }
