@@ -11,14 +11,14 @@ public class Optimizer {
 
     public static final Logger LOG = LogManager.getLogger(Optimizer.class);
 
-    // concat finite terminals to reduce number fo free variables
+    // concat finite terminals to reduce number of free variables
     public static final byte CONCAT = 1;
     // will simplify unnecessary nodes i.e. x_4 IN x_3+ AND x_3=c becomes x_4 IN c+
     public static final byte SIMPLIFY = 2;
     // will invert terms to start with 0 at top and also make sure there are no gaps
-    public static final byte ORDER = 4;
+    public static final byte ORDER = 4; // REMOVED FOR TIME BEING
     // will remove the definition of any duplicate nodes i.e. 'ab' in 'abc+ab'
-    public static final byte DUPLICATES = 8;
+    public static final byte DUPLICATES = 8; // NOT IMPLEMENTED
 
 
     public static RegEx optimize(RegEx r, byte options){
@@ -27,9 +27,6 @@ public class Optimizer {
             r = concat(r);
         if ((options & SIMPLIFY) > 0)
             r = simplify(r);
-        // removed due to issue with incorrect indexing for back-references
-//        if ((options & ORDER) > 0)
-//            r = order(r);
         return r;
     }
 

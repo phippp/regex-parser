@@ -14,6 +14,7 @@ import org.phippp.grammar.RegEx;
 import org.phippp.logic.Acyclic;
 import org.phippp.logic.Conjunctive;
 import org.phippp.logic.Spanner;
+import org.phippp.util.Logging;
 import org.phippp.util.Optimizer;
 import org.phippp.util.Renderer;
 import org.phippp.visitors.ObjectVisitor;
@@ -42,24 +43,23 @@ public class Main {
 
         // load inputs and parse grammar
         String input = getInput(arguments);
-        if(arguments.verbose) System.out.println(input);
+        Logging.log(String.format("Input: %s", input), LOG, arguments);
         CharStream stream = CharStreams.fromString(input);
         RegEx re = parse(stream);
-        LOG.info("BEFORE OPTIMIZATION:\n" + re.toString(true));
+        Logging.log(String.format("Before Optimization:%n%s", re.toString(true)), LOG, arguments);
 
         // optimize
         re = Optimizer.optimize(re, getOptimizations(arguments));
-        LOG.info("AFTER OPTIMIZATION:\n" + re.toString(true));
+        Logging.log(String.format("After Optimization:%n%s", re.toString(true)), LOG, arguments);
 
         // convert
         Conjunctive.Node conj = Conjunctive.fromRegEx(re);
         Spanner spanner = Spanner.fromRegEx(re);
         Pair<Boolean, Acyclic.Graph<Integer>> acyclic = Acyclic.bracket(spanner);
-        LOG.info(acyclic.getLeft() ? "IS" : "ISN'T");
-        LOG.info(spanner.subList(1, 1) .size());
+        Logging.log(String.format("%s have acyclic representation", acyclic.getLeft() ? "Does" : "Doesn't"), LOG, arguments);
         if(acyclic.getLeft())
-            Acyclic.tree(spanner, acyclic.getRight());
-        LOG.info(spanner);
+            Acyclic.tree(spanner, acyclic.getRight(), arguments).print();
+        Logging.log(String.format("%s", spanner), LOG, arguments);
 
         // visualize
         render(arguments, re);
@@ -94,7 +94,7 @@ public class Main {
     protected static void render(Args args, RegEx r) {
         try{
             String location = Renderer.makeGrammarGraph(r.traverse(), args.rough, args.title, args.file);
-            LOG.info("File saved! " + location);
+            Logging.log(String.format("File saved at : %s", location), LOG, args);
         } catch (IOException e){
             LOG.fatal(e);
         }
@@ -104,7 +104,7 @@ public class Main {
         try{
             conj = Optimizer.optimize(conj);
             String location = Renderer.makeConjunctiveGraph(conj, args.rough, args.title, args.file);
-            LOG.info("File saved! " + location);
+            Logging.log(String.format("File saved at : %s", location), LOG, args);
         } catch (IOException e){
             LOG.fatal(e);
         }

@@ -2,6 +2,7 @@ package org.phippp.util;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.phippp.logic.Spanner;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +15,7 @@ public class BinaryTree<T> {
     private final Node<T> root;
 
     public BinaryTree(T data) {
-        this.root = new Node<T>(data);
+        this.root = new Node<>(data);
     }
 
     public List<T> getLeaves() {
@@ -28,9 +29,6 @@ public class BinaryTree<T> {
         Node<T> parent = find(p);
         boolean success = parent.add(child);
         if(!success){
-            LOG.info(parent.left.data);
-            LOG.info(parent.right.data);
-            LOG.info(child);
             throw new RuntimeException("Failed adding to parent");
         }
         return this;
@@ -38,7 +36,11 @@ public class BinaryTree<T> {
 
     private Node<T> find(T data) {
         return this.traverse()
-                .filter(n -> n.data.equals(data))
+                .filter(n -> {
+                    // need to make sure it finds the exact instance not one with the same elements
+                    boolean match = !(data instanceof Spanner) || ((Spanner) data).getDisplacement() == ((Spanner) n.data).getDisplacement();
+                    return n.data.equals(data) && match;
+                })
                 .findFirst()
                 .orElseThrow();
     }

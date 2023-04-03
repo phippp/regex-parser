@@ -1,8 +1,5 @@
 package org.phippp.logic;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
-
 public class Parts {
 
     /**
@@ -11,20 +8,13 @@ public class Parts {
      * been replaced by String representations for the time being.
      */
 
-    public static final String ALPHA    = "α";          //'\u03b1';
+    public static final String ALPHA    = "α";          //'α';
     public static final String PREFIX   = "φ_α";
-    public static final String IN       = " IN " ;      //'\u2208';
-    public static final String DOT_EQ   = " = ";        //'\u2250';
-    public static final String AND      = " AND ";      //'\u2227';
-    public static final String EXISTS   = "EXISTS ";    //'\u2203';
-    public static final String JOIN     = "JOIN";       //'\u22c8';
-
-    public static Set<Integer> makeSet(int n) {
-        Set<Integer> set = new LinkedHashSet<>();
-        for(int i = 1; i <= n; i++)
-            set.add(i);
-        return set;
-    }
+    public static final String IN       = " IN " ;      //'∈';
+    public static final String DOT_EQ   = " = ";        //'≐';
+    public static final String AND      = " AND ";      //'∧';
+    public static final String EXISTS   = "EXISTS ";    //'∃';
+    public static final String JOIN     = "JOIN";       //'⋈';
 
     @Deprecated
     public static String constructTerminal(int curr, String value){
