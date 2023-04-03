@@ -56,6 +56,7 @@ public class Main {
         Spanner spanner = Spanner.fromRegEx(re);
         Pair<Boolean, Acyclic.Graph<Integer>> acyclic = Acyclic.bracket(spanner);
         LOG.info(acyclic.getLeft() ? "IS" : "ISN'T");
+        LOG.info(spanner.subList(1, 1) .size());
         if(acyclic.getLeft())
             Acyclic.tree(spanner, acyclic.getRight());
         LOG.info(spanner);

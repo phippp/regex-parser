@@ -14,97 +14,138 @@ public class Acyclic {
 
     private static final Logger LOG = LogManager.getLogger(Acyclic.class);
 
-    public static Conjunctive.Node tree(Spanner original, Graph<Integer> graph) {
+    public static BinaryTree<Spanner> tree(Spanner original, Graph<Integer> graph) {
+
+        for(Wrapper<Integer> w : graph.getE())
+            LOG.info(String.format("%s, %s, %s", w.left, w.middle, w.right));
+        for(Pair<Integer,Integer> p: graph.getV())
+            LOG.info(String.format("%s", p));
+
 
         BinaryTree<Spanner> tree = new BinaryTree<>(original);
-        int i = original.getDisplacement(), k = original.size() - 1;
-        while(canContinue(tree)){
-            for(int j = i; j <= k; j++){
-                Spanner sp1 = original.subList(i, j);
-                Spanner sp2 = original.subList(j + 1, k);
+        int i , k;
+        int c = 10;
+        outerLoop:
+        while(canContinue(tree) && c-- > 0){
+            Spanner leaf = tree.getLeaves().stream().filter(l -> l.size() > 1).findFirst().get();
+            i = leaf.getDisplacement(); k = leaf.getDisplacement() + leaf.size() - 1;
+            LOG.info(String.format("start index: %d      end index: %d", i, k));
+            for(int j = i + 1; j <= k; j++){
+                // considers disjoint variables
+                Spanner sp1 = leaf.subList(i, j);
+                Spanner sp2 = leaf.subList(j, k);
                 if(sp1.equals(sp2) || !intersects(sp1.var(), sp2.var())){
-
+                    LOG.info(String.format("Rule 1: Attempting to add (%d, %d) and (%d, %d)", i, j, j, k));
+                    tree.addToParent(leaf, sp1).addToParent(leaf, sp2);
+                    break;
+                }
+                // end disjoint part
+                // consider the left part
+                for(int x = i; x < j; x++) {
+                    if(checkLeft(leaf, graph, i, j, x, k)){
+                        LOG.info(String.format("Rule 2: Attempting to add (%d, %d) and (%d, %d)", i, j, j, k));
+                        tree.addToParent(leaf, sp1).addToParent(leaf, sp2);
+                        LOG.info(String.format("Rule 2a: Attempting to add (%d, %d) and (%d, %d)", i, (x + 1), (x + 1), j));
+                        tree.addToParent(sp1, leaf.subList(i, x + 1)).addToParent(sp1, leaf.subList(x + 1, j));
+                        continue outerLoop;
+                    }
+                }
+                // end left part
+                // consider the right part
+                for(int x = j + 1; x < k; x++) {
+                    if(checkRight(leaf, graph, i, j, x, k)){
+                        LOG.info(String.format("Rule 3: Attempting to add (%d, %d) and (%d, %d)", i, j, j, k));
+                        tree.addToParent(leaf, sp1).addToParent(leaf, sp2);
+                        LOG.info(String.format("Rule 3a: Attempting to add (%d, %d) and (%d, %d)", (j + 1), (x + 1), (x + 1), k));
+                        tree.addToParent(sp2, leaf.subList(j + 1, x + 1)).addToParent(sp2, leaf.subList(x + 1, k));
+                        continue outerLoop;
+                    }
                 }
             }
         }
+        return tree;
+    }
 
-        LOG.info("NODES");
-        for(Pair<Integer, Integer> p : graph.getV())
-            LOG.info(p.toString());
-        LOG.info("EDGES");
-        for(Wrapper<Integer> w : graph.getE())
-            LOG.info(w.left.toString() + w.middle + w.right);
+    public static boolean checkRight(Spanner leaf, Graph<Integer> graph, int i, int j, int x, int k){
+        // a[j+1,k] is subList(j+1, k+1), a[j+1, x] is subList(j+1, x+1), a[x+1, k+1] is subList(x+1, k+1)
+        Wrapper<Integer> w = new Wrapper<>(j + 1, k + 1, j + 1, x + 1, x + 1, k + 1);
+        LOG.info(String.format("%d %d %d %d", i, j + 1, x + 1, k + 1));
+        Spanner ij = leaf.subList(i, j + 1), jx = leaf.subList(j + 1, x + 1),
+                xk = leaf.subList(x + 1, k + 1);
+        return graph.getE().contains(w) && (ij.equals(jx) || ij.equals(xk));
+    }
 
-
-
-        return null;
+    public static boolean checkLeft(Spanner leaf, Graph<Integer> graph, int i, int j, int x, int k){
+        // a[i,j] is subList(i, j+1), a[i,x] is subList(i, x+1), a[x+1,j] is subList(x+1, j+1)
+        Wrapper<Integer> w = new Wrapper<>(i, j + 1, i, x + 1, x + 1, j + 1);
+        LOG.info(String.format("%d %d %d %d", i, j + 1, x + 1, k + 1));
+        Spanner ix = leaf.subList(i, x + 1), jk = leaf.subList(j + 1, k + 1),
+                xj = leaf.subList(x + 1, j + 1);
+        return graph.getE().contains(w) && (ix.equals(jk) || xj.equals(jk));
     }
 
     public static boolean canContinue(BinaryTree<Spanner> tree) {
         List<Spanner> list = tree.getLeaves();
+//        List<BinaryTree.Node<Spanner>> t = tree.traverse().peek(n -> LOG.info(n.toString() + "\n")).toList();
+        tree.print();
+        LOG.info(list.get(0).toString());
+        LOG.info(String.format("Leaf nodes: %d", list.stream().filter(s -> s.size() > 1).count()));
         return list.stream().map(Spanner::size).anyMatch(s -> s > 1);
     }
 
     public static Pair<Boolean, Graph<Integer>> bracket(Spanner original) {
         int n = original.size();
         Set<Pair<Integer, Integer>> v = new HashSet<>();
-        Set<Wrapper<Integer>> e = new HashSet<>();
+        Set<Wrapper<Integer>> Etilde = new HashSet<>();
         Set<Wrapper<Integer>> E = new HashSet<>();
         // generate starting values;
+        // a[i, i] is sublist(i, i+1), a[i+1, i+1] is sublist(i+1, i+2), a[i, i+1] is subList(i, i+2)
         for(int i : Parts.makeSet(n - 1)){
-            v.addAll(List.of(Pair.of(i, i), Pair.of(i + 1, i + 1), Pair.of(i, i + 1)));
+            v.addAll(List.of(Pair.of(i, i + 1), Pair.of(i + 1, i + 2), Pair.of(i, i + 2)));
+            Etilde.add(new Wrapper<>(Pair.of(i, i + 2), Pair.of(i, i + 1), Pair.of(i + 1, i + 2)));
         }
-        for(int i : Parts.makeSet(n - 1)){
-            e.add(new Wrapper<>(Pair.of(i, i + 1), Pair.of(i, i), Pair.of(i + 1, i + 1)));
-        }
-        while(!(e.containsAll(E) && E.containsAll(e))){
+        //
+        while(!Etilde.equals(E)){
             // janky way to swap all elements
             E.clear();
-            E.addAll(e);
-            //
+            E.addAll(Etilde);
+            // nested for loop equivalent to for i,k in [n] where i < k
             for(int i : Parts.makeSet(n)){
-                for(int k : Parts.makeSet(n)){
-                    if(i > k) continue;
+                for(int k = i + 1; k <= n; k++){
                     for(int j = i; j < k; j++){
-                        Wrapper<Integer> w = new Wrapper<>(Pair.of(i, k), Pair.of(i, j), Pair.of(j + 1 ,k));
-                        if(!e.contains(w)){
-                            if(v.containsAll(List.of(Pair.of(i, j), Pair.of(j + 1, k))) && isAcyclic(i, j, k, original, e)){
-                                e.add(w);
-                                v.add(Pair.of(i, k));
+                        // a[i, k] is subList(i, k+1), a[i, j] is subList(i, j+1), a[j+1, k] is subList(j+1, k+1)
+                        Wrapper<Integer> w = new Wrapper<>(i, k + 1, i, j + 1, j + 1, k + 1);
+                        if(!Etilde.contains(w)){
+                            // a[i, j] is subList(i, j+1), a[j+1, k] is subList(j+1, k+1)
+                            if(v.containsAll(List.of(Pair.of(i, j + 1), Pair.of(j + 1, k + 1))) && isAcyclic(i, j, k, original, Etilde)){
+                                Etilde.add(w);
+                                v.add(Pair.of(i, k + 1));
                             }
                         }
                     }
                 }
             }
         }
-        return Pair.of(v.contains(Pair.of(1, n)), new Graph<>(v, e));
+        return Pair.of(v.contains(Pair.of(1, n + 1)), new Graph<>(v, Etilde));
     }
 
     private static boolean isAcyclic(int i, int j, int k, Spanner spanner, Set<Wrapper<Integer>> list){
-        Spanner sp1 = spanner.subList(i, j);
-        Spanner sp2 = spanner.subList(j + 1, k);
+        // a[i,j] is subList(i j+1) a[j+1, k] is subList(j+1, k+1), a[i,x] is subList(i, x+1), a[x+1,j] is subList(x+1, j+1)
+        Spanner sp1 = spanner.subList(i, j + 1), sp2 = spanner.subList(j + 1, k + 1);
         if(sp1.equals(sp2))
             return true;
         if(!intersects(sp1.var(), sp2.var()))
             return true;
-        for(int x = i; x < spanner.size(); x++){
-            Wrapper<Integer> w = new Wrapper<>(Pair.of(i, j), Pair.of(i, x), Pair.of(x + 1, j));
-            if(sp2.equals(spanner.subList(i, x)) && list.contains(w))
+        for(int x = i; x < j; x++){
+            Wrapper<Integer> w1 = new Wrapper<>(i, j+1, i, x+1, x+1, j+1);
+            Wrapper<Integer> w2 = new Wrapper<>(j+1, k+1, j+1, x+1, x+1, k+1);
+            if(list.contains(w1) && sp2.equals(spanner.subList(i, x+1)))
                 return true;
-        }
-        for(int x = spanner.getDisplacement(); x < j; x++){
-            Wrapper<Integer> w = new Wrapper<>(Pair.of(i, j), Pair.of(i, x), Pair.of(x + 1, j));
-            if(sp2.equals(spanner.subList(x + 1, j)) && list.contains(w))
+            if(list.contains(w1) && sp2.equals(spanner.subList(x+1, j+1)))
                 return true;
-        }
-        for(int x = j + 1; x < spanner.size(); x++){
-            Wrapper<Integer> w = new Wrapper<>(Pair.of(j + 1, k),Pair.of(j + 1, x),Pair.of(x + 1, k));
-            if(sp1.equals(spanner.subList(j + 1, x)) && list.contains(w))
+            if(list.contains(w2) && sp1.equals(spanner.subList(j+1, x+1)))
                 return true;
-        }
-        for(int x = spanner.getDisplacement(); x < k; x++){
-            Wrapper<Integer> w = new Wrapper<>(Pair.of(j + 1, k),Pair.of(j + 1, x),Pair.of(x + 1, k));
-            if(sp1.equals(spanner.subList(x + 1, k)) && list.contains(w))
+            if(list.contains(w2) && sp1.equals(spanner.subList(x+1, k+1)))
                 return true;
         }
         return false;
@@ -112,7 +153,7 @@ public class Acyclic {
 
     protected static <T> boolean intersects(Set<T> s1, Set<T> s2){
         // ensures it is mutable
-        Set<T> inter = new HashSet<T>(s1);
+        Set<T> inter = new HashSet<>(s1);
         inter.retainAll(s2);
         return inter.size() > 0;
     }
@@ -128,6 +169,14 @@ public class Acyclic {
         private final Pair<T, T> left;
         private final Pair<T, T> middle;
         private final Pair<T, T> right;
+
+        public Wrapper(T... values) {
+            super();
+            if(values.length != 6) throw new RuntimeException("Invalid number of parameters");
+            left = Pair.of(values[0], values[1]);
+            middle = Pair.of(values[2], values[3]);
+            right = Pair.of(values[4], values[5]);
+        }
 
         public Wrapper(Pair<T, T> l, Pair<T, T> m, Pair<T, T> r){
             super();

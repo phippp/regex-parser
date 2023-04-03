@@ -1,10 +1,15 @@
 package org.phippp.util;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
 public class BinaryTree<T> {
+
+    private final static Logger LOG = LogManager.getLogger(BinaryTree.class);
 
     private final Node<T> root;
 
@@ -19,13 +24,38 @@ public class BinaryTree<T> {
                 .toList();
     }
 
+    public BinaryTree<T> addToParent(T p, T child) {
+        Node<T> parent = find(p);
+        boolean success = parent.add(child);
+        if(!success){
+            LOG.info(parent.left.data);
+            LOG.info(parent.right.data);
+            LOG.info(child);
+            throw new RuntimeException("Failed adding to parent");
+        }
+        return this;
+    }
+
+    private Node<T> find(T data) {
+        return this.traverse()
+                .filter(n -> n.data.equals(data))
+                .findFirst()
+                .orElseThrow();
+    }
+
     public Stream<Node<T>> traverse() {
         return root.traverse().stream();
     }
 
-    private static class Node<T>{
+    public void print() {
+        List<Node<T>> list = this.traverse()
+                .peek(n -> LOG.info(String.format("%s", n.data)))
+                .toList();
+    }
 
-        private T data;
+    public static class Node<T>{
+
+        private final T data;
         private Node<T> left;
         private Node<T> right;
 
@@ -41,6 +71,22 @@ public class BinaryTree<T> {
             return list;
         }
 
+        public boolean add(T data) {
+            if(left == null) {
+                left = new Node<>(data);
+                return true;
+            }
+            if(right == null) {
+                right = new Node<>(data);
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public String toString() {
+            return data.toString();
+        }
     }
 
 }

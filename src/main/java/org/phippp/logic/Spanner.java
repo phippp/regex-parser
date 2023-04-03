@@ -2,7 +2,6 @@ package org.phippp.logic;
 
 import org.phippp.grammar.RegEx;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -25,7 +24,7 @@ public class Spanner {
         List<RegEx> list = re.traverse().stream()
                 .filter(r -> !(r.getRule() == RegEx.Rule.CONCAT || r.getRule() == RegEx.Rule.REFERENCE))
                 .toList();
-        return new Spanner(list, 0);
+        return new Spanner(list, 1);
     }
 
     public int size() {
@@ -36,7 +35,7 @@ public class Spanner {
         // this should allow a subset to chain correctly
         // i.e .subList(1,5).sublist(2,4) will contain 2 -> 4 from the original
         List<RegEx> list = this.parts.subList(a - this.displacement, b - this.displacement);
-        return new Spanner(list, this.displacement + a);
+        return new Spanner(list, this.displacement + a - 1);
     }
 
     public Set<String> var() {
@@ -61,10 +60,10 @@ public class Spanner {
         Set<Integer> terms = Parts.makeSet(size());
         StringBuilder str = new StringBuilder(Parts.ALPHA)
                 .append(Parts.DOT_EQ)
-                .append(String.join(".", terms.stream().map(i -> Parts.ALPHA + "_" + i).toList()))
+                .append(String.join(".", terms.stream().map(i -> Parts.ALPHA + "_" + (i + displacement - 1)).toList()))
                 .append("\nWHERE\n");
         for(int i : terms)
-            str.append(Parts.ALPHA).append("_").append(i).append(" IS (").append(parts.get(i - 1).toNode().toString()).append("), ");
+            str.append(Parts.ALPHA).append("_").append((i + displacement - 1)).append(" IS (").append(parts.get(i - 1).toNode().toString()).append("), ");
         return str.toString();
     }
 
