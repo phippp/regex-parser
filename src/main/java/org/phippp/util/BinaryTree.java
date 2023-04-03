@@ -55,6 +55,10 @@ public class BinaryTree<T> {
                 .toList();
     }
 
+    public Node<T> getRoot() {
+        return root;
+    }
+
     public static class Node<T>{
 
         private final T data;
@@ -83,6 +87,22 @@ public class BinaryTree<T> {
                 return true;
             }
             return false;
+        }
+
+        public T getData() {
+            return data;
+        }
+
+        public boolean isLeaf() {
+            return this.left == null && this.right == null;
+        }
+
+        public Node<T> getLeft() {
+            return left;
+        }
+
+        public Node<T> getRight() {
+            return right;
         }
 
         @Override

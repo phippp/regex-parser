@@ -3,7 +3,7 @@ package org.phippp.grammar;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.phippp.logic.Conjunctive;
+import org.phippp.logic.ConjunctiveTree;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -14,6 +14,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.phippp.logic.ConjunctiveTree.Type.FILTER;
 import static org.phippp.logic.Parts.*;
 
 public class RegEx {
@@ -94,15 +95,6 @@ public class RegEx {
         return this;
     }
 
-    public String toConjunctive(Conjunctive.Type type){
-        if(type == Conjunctive.Type.FILTER) {
-            String symbol = (rule == Rule.CHARACTER) ? DOT_EQ : IN;
-            return getVariable() + symbol + text + getSpecial().getRight();
-        }
-        String t = term == 0 ? "w" : getVariable();
-        return t + DOT_EQ + String.join("", getChildren().stream().map(RegEx::getVariable).toList());
-    }
-
     public String toString(boolean start){
         List<String> variables = Stream.of(this, left, right)
                 .filter(Objects::nonNull)
@@ -158,6 +150,15 @@ public class RegEx {
         return builder.toString();
     }
 
+    public String toNodeString() {
+        if(getType() == FILTER) {
+            String symbol = (rule == Rule.CHARACTER) ? DOT_EQ : IN;
+            return String.format("%s%s%s%s", getVariable(), symbol, text, getSpecial().getRight());
+        }
+        String t = term == 0 ? "w" : getVariable();
+        return t + DOT_EQ + String.join("", getChildren().stream().map(RegEx::getVariable).toList());
+    }
+
     /**
      * Multiple traversal functions, with defaults to accept without
      * having to remember to pass arguments.
@@ -206,21 +207,6 @@ public class RegEx {
         return clone;
     }
 
-    public Conjunctive.Node toNode() {
-        // need to work out which group we are in...
-        if(terminal)
-            return new Conjunctive.Node(Conjunctive.Type.FILTER, this);
-        // wxx or wxy
-        if(term == 0){
-            Conjunctive.Type type = (Objects.equals(left.term, right.term))
-                    ? Conjunctive.Type.WXX : Conjunctive.Type.WXY;
-            return new Conjunctive.Node(type, this);
-        }
-        Conjunctive.Type type = (Objects.equals(left.term, right.term))
-                ? Conjunctive.Type.XYY : Conjunctive.Type.XYZ;
-        return new Conjunctive.Node(type, this);
-    }
-
     /**
      * Getters, I originally was planning on not having these exposed
      * at all, however it's becoming a pain to add redundant class
@@ -261,6 +247,16 @@ public class RegEx {
 
     private String getVariable(){
         return "x_" + this.term;
+    }
+
+    public ConjunctiveTree.Type getType() {
+        if(this.terminal) return FILTER;
+        if(term == 0){
+            return (Objects.equals(left.term, right.term))
+                    ? ConjunctiveTree.Type.WXX : ConjunctiveTree.Type.WXY;
+        }
+        return (Objects.equals(left.term, right.term))
+                ? ConjunctiveTree.Type.XYY : ConjunctiveTree.Type.XYZ;
     }
 
     @Override

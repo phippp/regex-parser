@@ -1,7 +1,11 @@
 # RegEx Parser
 
 This is part of my final year project for Loughborough University. I am developing a compiler that converts regular expressions with back references to the logic FC.
-The plan is to then further optimize the result to make evaluation more effecient.
+The plan is to then further optimize the result to make evaluation more efficient.
+
+## Compilation
+
+To compile this into a runnable `.jar` file, you will need [maven](https://maven.apache.org). Then from the root of this project simply run `mvn clean install`.
 
 ## Syntax
 

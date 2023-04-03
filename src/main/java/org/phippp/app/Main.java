@@ -12,8 +12,9 @@ import org.phippp.antlr4.RegExLexer;
 import org.phippp.antlr4.RegExParser;
 import org.phippp.grammar.RegEx;
 import org.phippp.logic.Acyclic;
-import org.phippp.logic.Conjunctive;
+import org.phippp.logic.ConjunctiveTree;
 import org.phippp.logic.Spanner;
+import org.phippp.util.BinaryTree;
 import org.phippp.util.Logging;
 import org.phippp.util.Optimizer;
 import org.phippp.util.Renderer;
@@ -53,17 +54,18 @@ public class Main {
         Logging.log(String.format("After Optimization:%n%s", re.toString(true)), LOG, arguments);
 
         // convert
-        Conjunctive.Node conj = Conjunctive.fromRegEx(re);
         Spanner spanner = Spanner.fromRegEx(re);
         Pair<Boolean, Acyclic.Graph<Integer>> acyclic = Acyclic.bracket(spanner);
         Logging.log(String.format("%s have acyclic representation", acyclic.getLeft() ? "Does" : "Doesn't"), LOG, arguments);
-        if(acyclic.getLeft())
-            Acyclic.tree(spanner, acyclic.getRight(), arguments).print();
         Logging.log(String.format("%s", spanner), LOG, arguments);
 
         // visualize
         render(arguments, re);
-        render(arguments, conj);
+        if(acyclic.getLeft()) {
+            BinaryTree<Spanner> bTree = Acyclic.tree(spanner, acyclic.getRight(), arguments);
+            ConjunctiveTree tree = ConjunctiveTree.fromTree(bTree);
+            render(arguments, tree);
+        }
     }
 
     protected static byte getOptimizations(Args args) {
@@ -100,10 +102,9 @@ public class Main {
         }
     }
 
-    protected static void render(Args args, Conjunctive.Node conj){
+    protected static void render(Args args, ConjunctiveTree tree){
         try{
-            conj = Optimizer.optimize(conj);
-            String location = Renderer.makeConjunctiveGraph(conj, args.rough, args.title, args.file);
+            String location = Renderer.makeConjunctiveGraph(tree, args.rough, args.title, args.file);
             Logging.log(String.format("File saved at : %s", location), LOG, args);
         } catch (IOException e){
             LOG.fatal(e);

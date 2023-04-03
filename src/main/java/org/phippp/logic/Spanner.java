@@ -5,6 +5,7 @@ import org.phippp.util.SetHelper;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 public class Spanner {
@@ -32,6 +33,15 @@ public class Spanner {
         return this.parts.size();
     }
 
+    public boolean isSquare() {
+        if(size() % 2 == 1) return false;
+        return this.parts.subList(0, size() / 2).equals(this.parts.subList(size() / 2, size()));
+    }
+
+    public int hash() {
+        return Objects.hash(displacement, size());
+    }
+
     public Spanner subList(int a, int b) {
         // this should allow a subset to chain correctly
         // i.e .subList(1,5).sublist(2,4) will contain 2 -> 4 from the original
@@ -44,6 +54,10 @@ public class Spanner {
         for(RegEx r: parts)
             list.add("x_" + r.getTerm());
         return list;
+    }
+
+    public List<RegEx> source() {
+        return parts;
     }
 
     @Override
@@ -64,7 +78,7 @@ public class Spanner {
                 .append(String.join(".", terms.stream().map(i -> Parts.ALPHA + "_" + (i + displacement - 1)).toList()))
                 .append("\nWHERE\n");
         for(int i : terms)
-            str.append(Parts.ALPHA).append("_").append((i + displacement - 1)).append(" IS (").append(parts.get(i - 1).toNode().toString()).append("), ");
+            str.append(Parts.ALPHA).append("_").append((i + displacement - 1)).append(" IS (").append(parts.get(i - 1).toNodeString()).append("), ");
         return str.toString();
     }
 

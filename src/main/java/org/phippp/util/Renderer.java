@@ -8,7 +8,7 @@ import guru.nidi.graphviz.model.Graph;
 import guru.nidi.graphviz.model.LinkSource;
 import guru.nidi.graphviz.rough.Roughifyer;
 import org.phippp.grammar.RegEx;
-import org.phippp.logic.Conjunctive;
+import org.phippp.logic.ConjunctiveTree;
 
 import java.io.File;
 import java.io.IOException;
@@ -41,12 +41,12 @@ public class Renderer {
         return sources;
     }
 
-    public static List<LinkSource> makeLinks(Conjunctive.Node node) {
+    public static List<LinkSource> makeLinks(ConjunctiveTree tree) {
         List<LinkSource> sources = new ArrayList<>();
-        List<Conjunctive.Node> list = node.toList();
+        List<ConjunctiveTree.Node> list = tree.toList();
 
         for(int i = 0; i < list.size(); i++){
-            Conjunctive.Node local = list.get(i);
+            ConjunctiveTree.Node local = list.get(i);
             boolean isJoin = local.isJoin();
 
             sources.add(node(isJoin ? "j_" + i : "t_" + i)
@@ -88,8 +88,8 @@ public class Renderer {
         return makeGraph(sources, rough, params);
     }
 
-    public static String makeConjunctiveGraph(Conjunctive.Node node, boolean rough, String... params) throws IOException {
-        List<LinkSource> sources = makeLinks(node);
+    public static String makeConjunctiveGraph(ConjunctiveTree tree, boolean rough, String... params) throws IOException {
+        List<LinkSource> sources = makeLinks(tree);
         params[1] = params[1].toLowerCase().endsWith(".png")
                 ? params[1].replace(".png", "_conj.png")
                 : params[1] + "_conj";
