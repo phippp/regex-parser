@@ -3,10 +3,9 @@ package org.phippp.logic;
 import org.phippp.grammar.RegEx;
 import org.phippp.util.BinaryTree;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Stack;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.phippp.logic.Parts.ALPHA;
@@ -95,7 +94,7 @@ public class ConjunctiveTree {
             this.right = (nodes.length > 1) ? nodes[1] : null;
             this.data = null;
             this.type = Type.CONJ;
-            this.restrictions = null;
+            this.restrictions = new ArrayList<>();
         }
 
         public static Node newJoin(Node n, Node m){
@@ -124,22 +123,57 @@ public class ConjunctiveTree {
         }
 
         public List<Node> getChildren(){
-            List<Node> list = new ArrayList<>();
-            if(type != Type.CONJ) return list;
-            list.addAll(List.of(left, right));
-            list.removeIf(Objects::isNull);
-            return list;
+            if(type != Type.CONJ) return new ArrayList<>();
+            return Stream.of(left, right)
+                    .filter(Objects::nonNull)
+                    .toList();
         }
 
         @Override
         public String toString(){
+            // we should only call toString on ⋈ or concatenation nodes
             if(type == Type.CONJ)
                 return Parts.JOIN;
             if(data == null)
                 throw new RuntimeException("No object to call function on");
             int parent = this.data.getData().hash(), left = this.data.getLeft().getData().hash(),
                     right = this.data.getRight().getData().hash();
-            return String.format("%s_%d %s %s_%d.%s_%d", ALPHA, parent, DOT_EQ, ALPHA, left, ALPHA, right);
+            StringBuilder str = new StringBuilder(
+                    String.format("%s_%d %s %s_%d.%s_%d", ALPHA, parent, DOT_EQ, ALPHA, left, ALPHA, right));
+            if(restrictions.size() > 0) str.append("\n WITH ");
+            for(RegEx r : restrictions)
+                str.append("\n").append(ALPHA).append("_").append(getHash(r)).append(" AS ").append(r.toNodeString()).append(",");
+            return str.toString();
+        }
+
+        private int getHash(RegEx r) {
+            if(data == null || data.getLeft() == null || data.getRight() == null) return -1;
+            Optional<Spanner> spanner = Stream.of(data.getLeft(), data.getRight())
+                    .map(BinaryTree.Node::getData)
+                    .filter(n -> n.source().get(0).equals(r))
+                    .findFirst();
+            return spanner.map(Spanner::hash).orElse(-1);
+        }
+
+        public BinaryTree.Node<Spanner> getData() {
+            return data;
+        }
+
+        public List<Integer> getRegExIndexes() {
+            List<BinaryTree.Node<Spanner>> list = List.of(getData().getLeft(), getData().getRight());
+            List<Integer> ints = new ArrayList<>();
+            for(int i = 0; i < list.size(); i++){
+                if(list.get(i).isLeaf()) ints.add(i);
+            }
+            return ints;
+        }
+
+        public Type getType() {
+            return type;
+        }
+
+        public List<RegEx> getRestrictions() {
+            return restrictions;
         }
 
         public List<Node> toList(){

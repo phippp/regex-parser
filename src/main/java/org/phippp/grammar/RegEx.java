@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -33,7 +34,7 @@ public class RegEx {
         return r.replaceChildren(children);
     };
     public static final Predicate<RegEx> EXTENDED_PLUS_OPTIONAL = r -> {
-        return (r.rule == Rule.PLUS || r.rule == Rule.OPTIONAL) && r.left.terminal;
+        return (r.rule == Rule.PLUS || r.rule == Rule.OPTIONAL) && r.left.rule == Rule.CHARACTER;
     };
     public static final Function<RegEx, RegEx> SIMPLIFY = r -> {
         return RegEx.makeTerminal(r, r.rule, r.left.text);
@@ -138,6 +139,43 @@ public class RegEx {
      * Alternative to toString that gives a basic description of the
      * node, useful for debugging.
      */
+
+    public boolean match(String str){
+        if(getType() != FILTER) return false;
+        if(rule == Rule.CHARACTER) return text.equals(str);
+        if(rule == Rule.PLUS) {
+            if(terminal) {
+                if (str.length() % text.length() != 0) return false;
+                for (int i = 0; i < str.length(); i += text.length())
+                    if (!str.substring(i, i + text.length()).equals(text)) return false;
+                return true;
+            } else {
+                boolean match = false;
+                for(int j = 0; j < (str.length() / left.text.length()); j++){
+                    int i;
+                    // makes a string with i repetitions of left.text
+                    String ext = new String(new char[j]).replace("\0", this.left.text);
+                    for(i = 0; i < str.length(); i += ext.length()){
+                        if(!str.substring(i, i + ext.length()).equals(ext))
+                            break;
+                    }
+                    if (i == str.length()) {
+                        match = true;
+                        break;
+                    }
+                }
+                return match;
+            }
+        }
+        if(rule == Rule.OPTIONAL) return "".equals(str) || text.equals(str);
+        return false;
+    }
+
+    public Pattern getSimplePattern(){
+        if(getType() != FILTER)
+            throw new RuntimeException("Invalid operation");
+        return Pattern.compile(String.format("^%s%s$", text, getSpecial().getRight()));
+    }
 
     public String describe() {
         StringBuilder builder = new StringBuilder();
@@ -250,7 +288,7 @@ public class RegEx {
     }
 
     public ConjunctiveTree.Type getType() {
-        if(this.terminal) return FILTER;
+        if(this.terminal || (this.left.terminal && this.right == null)) return FILTER;
         if(term == 0){
             return (Objects.equals(left.term, right.term))
                     ? ConjunctiveTree.Type.WXX : ConjunctiveTree.Type.WXY;

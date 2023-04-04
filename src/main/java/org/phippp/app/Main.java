@@ -12,6 +12,7 @@ import org.phippp.antlr4.RegExLexer;
 import org.phippp.antlr4.RegExParser;
 import org.phippp.grammar.RegEx;
 import org.phippp.logic.Acyclic;
+import org.phippp.logic.BruteForce;
 import org.phippp.logic.ConjunctiveTree;
 import org.phippp.logic.Spanner;
 import org.phippp.util.BinaryTree;
@@ -22,6 +23,7 @@ import org.phippp.visitors.ObjectVisitor;
 
 import java.io.IOException;
 import java.util.Scanner;
+import java.util.regex.Pattern;
 
 public class Main {
 
@@ -65,6 +67,15 @@ public class Main {
             BinaryTree<Spanner> bTree = Acyclic.tree(spanner, acyclic.getRight(), arguments);
             ConjunctiveTree tree = ConjunctiveTree.fromTree(bTree);
             render(arguments, tree);
+            if(arguments.query != null) {
+                boolean match = BruteForce.testString(arguments.query, tree, arguments);
+                String m = match ? "does" : "doesn't";
+                Logging.log(String.format("%s %s match the input %s", arguments.query, m, arguments.input), LOG, arguments);
+                long start = System.currentTimeMillis();
+                Pattern p = Pattern.compile(String.format("^%s$", arguments.input.replace('$', '\\')));
+                match = p.matcher(arguments.query).matches();
+                Logging.log(String.format("Took %dms", (System.currentTimeMillis() - start)), LOG, arguments);
+            }
         }
     }
 
