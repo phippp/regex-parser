@@ -12,7 +12,7 @@ import org.phippp.visitors.ObjectVisitor;
 public class ParseTests {
 
     @ParameterizedTest
-    @ValueSource(strings = {"abc", "(a)$1", "(a|b)c", "(a+|b+)c", "(a+)b$1c", "(a+)b$1c$1"})
+    @ValueSource(strings = {"abc", "(a)$1", "(a|b)c", "(a+|b+)c", "(a+)b$1c", "(a+)b$1c$1", "((a)b)(c)$1$2$3"})
     void parseString(String str){
         parse(str);
     }

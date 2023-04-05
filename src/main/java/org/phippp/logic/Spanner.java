@@ -3,10 +3,7 @@ package org.phippp.logic;
 import org.phippp.grammar.RegEx;
 import org.phippp.util.SetHelper;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 public class Spanner {
 
@@ -26,6 +23,12 @@ public class Spanner {
         List<RegEx> list = re.traverse().stream()
                 .filter(r -> !(r.getRule() == RegEx.Rule.CONCAT || r.getRule() == RegEx.Rule.REFERENCE))
                 .toList();
+        list = new ArrayList<>(list);
+        List<RegEx> remove = new ArrayList<>();
+        for(RegEx parent : list)
+            for(RegEx child : list)
+                if(parent.getChildren().contains(child)) remove.add(child);
+        list.removeAll(remove);
         return new Spanner(list, 1);
     }
 

@@ -62,6 +62,11 @@ public class BruteForce {
                         }
                     }
                 }
+                // need to check that there isn't a case where only one child i.e. (a)+ the a is nested left inside
+                else if(node.getChildren().isEmpty()){
+                    if(node.getData().getData().source().get(0).match(pair.getLeft() + pair.getRight()))
+                        matches.add(pair.getLeft() + pair.getRight());
+                }
                 // none are restrictions
                 else {
                     if(NODES.get(node.getData().getRight().getData().hash()).contains(pair.getRight()) &&
@@ -75,7 +80,10 @@ public class BruteForce {
         }
 
         Logging.log(String.format("Took %dms", (System.currentTimeMillis() - start)), LOG, args);
-        return !NODES.get(list.get(list.size() - 1).getData().getData().hash()).isEmpty();
+        boolean value = !NODES.get(list.get(list.size() - 1).getData().getData().hash()).isEmpty();
+        // clear out sets for testing
+        NODES.clear(); WXX.clear(); WXY.clear(); XYY.clear(); XYZ.clear();
+        return value;
     }
 
     private static Set<Pair<String, String>> getSet(ConjunctiveTree.Type type) {

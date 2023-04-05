@@ -1,4 +1,6 @@
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.phippp.grammar.RegEx;
 import org.phippp.util.Optimizer;
 
@@ -14,50 +16,28 @@ public class OptimizationTests {
         assertEquals(1, r.traverse().size());
     }
 
-    @Test
-    public void optimizationConcat() {
-        String str = "qwerty";
+    @ParameterizedTest
+    @CsvSource({"qwerty, 1", "qwertyuiop, 1", "abcdef(abcdef), 1"})
+    public void optimizationConcat(String str, int num) {
         RegEx r = ParseTests.parse(str);
         r = Optimizer.optimize(r, Optimizer.CONCAT);
-        assertEquals(1, r.traverse().size());
+        assertEquals(num, r.traverse().size());
     }
 
-    @Test
-    public void optimizationSimplify1() {
-        String str = "(a)+";
+    @ParameterizedTest
+    @CsvSource({"(a)+, 1", "(a+)+, 2"})
+    public void optimizationSimplify(String str, int num) {
         RegEx r = ParseTests.parse(str);
         r = Optimizer.optimize(r, Optimizer.SIMPLIFY);
-        assertEquals(1, r.traverse().size());
+        assertEquals(num, r.traverse().size());
     }
 
-    @Test
-    public void optimizationSimplify2() {
-        String str = "(a+)+";
-        RegEx r = ParseTests.parse(str);
-        r = Optimizer.optimize(r, Optimizer.SIMPLIFY);
-        assertEquals(2, r.traverse().size());
-    }
-
-    @Test
-    public void optimizationSimplify() {
-        String str = "(a)|(b)";
-
-    }
-
-    @Test
-    public void optimizationAll1() {
+    @ParameterizedTest
+    @CsvSource({"(((abc)))|b, 3", "aa?, 3", "(a+)+, 1", "(a|b)+, 4"})
+    public void optimizationAll() {
         String str = "(((abc)))|b";
         RegEx r = ParseTests.parse(str);
         r = Optimizer.optimize(r, (byte) (Optimizer.SIMPLIFY | Optimizer.CONCAT));
         assertEquals(3, r.traverse().size());
     }
-
-    @Test
-    public void optimizationAll2() {
-        String str = "aa?";
-        RegEx r = ParseTests.parse(str);
-        r = Optimizer.optimize(r, (byte) (Optimizer.SIMPLIFY | Optimizer.CONCAT));
-        assertEquals(3, r.traverse().size());
-    }
-
 }

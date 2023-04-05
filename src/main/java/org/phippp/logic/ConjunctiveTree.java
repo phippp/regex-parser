@@ -1,11 +1,11 @@
 package org.phippp.logic;
 
+import org.phippp.app.Args;
 import org.phippp.grammar.RegEx;
 import org.phippp.util.BinaryTree;
+import org.phippp.util.Logging;
 
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.phippp.logic.Parts.ALPHA;
@@ -13,37 +13,32 @@ import static org.phippp.logic.Parts.DOT_EQ;
 
 public class ConjunctiveTree {
 
-    private final List<RegEx> allRestrictions;
     private final Node root;
 
+    @Deprecated
     public static ConjunctiveTree fromSpanner(Spanner s) {
         return null;
     }
 
     public static ConjunctiveTree fromTree(BinaryTree<Spanner> t) {
-        List<RegEx> restrictions = t.traverse()
-                .filter(BinaryTree.Node::isLeaf)
-                .map(n -> n.getData().source().get(0))
-                .toList();
-
         int c = 0;
         // create the first root node
         BinaryTree.Node<Spanner> root = t.getRoot();
         boolean square = root.getData().isSquare();
         Type type = square ? Type.WXX : Type.WXY;
         List<RegEx> rest = Stream.of(root.getLeft(), root.getRight())
+                .filter(Objects::nonNull)
                 .filter(BinaryTree.Node::isLeaf)
                 .map(n -> n.getData().source().get(0))
                 .toList();
-        Node n = new Node(c++, type, root, rest);
-        Node node = Node.newJoin(n, null);
+        Node node = new Node(type, root, rest);
+        c++;
         Node start = node;
         // build stack to do dfs traversal
         Stack<BinaryTree.Node<Spanner>> stack = new Stack<>();
-        stack.push(root.getLeft());
-        stack.push(root.getRight());
+        if(root.getLeft() != null) stack.push(root.getLeft());
+        if(root.getRight() != null) stack.push(root.getRight());
 
-        //
         while(!stack.empty()){
             BinaryTree.Node<Spanner> current = stack.pop();
             if(current.isLeaf()) continue;
@@ -53,18 +48,19 @@ public class ConjunctiveTree {
                     .filter(BinaryTree.Node::isLeaf)
                     .map(r -> r.getData().source().get(0))
                     .toList();
-            n = new Node(c++, type, current, rest);
+            Node n = new Node(type, current, rest);
+            c++;
             node = node.addNode(n);
+            if(c == 2 && start != node) start = node;
 
             stack.push(current.getLeft());
             stack.push(current.getRight());
         }
 
-        return new ConjunctiveTree(restrictions, start);
+        return new ConjunctiveTree(start);
     }
 
-    protected ConjunctiveTree(List<RegEx> r, Node root){
-        this.allRestrictions = r;
+    protected ConjunctiveTree(Node root){
         this.root = root;
     }
 
@@ -82,7 +78,7 @@ public class ConjunctiveTree {
         private Node right;
 
         //need to check if a square
-        public Node(int term, Type type, BinaryTree.Node<Spanner> node, List<RegEx> restrictions){
+        public Node(Type type, BinaryTree.Node<Spanner> node, List<RegEx> restrictions){
             this.type = type;
             this.data = node;
             this.restrictions = restrictions;
