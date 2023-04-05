@@ -33,11 +33,10 @@ public class OptimizationTests {
     }
 
     @ParameterizedTest
-    @CsvSource({"(((abc)))|b, 3", "aa?, 3", "(a+)+, 1", "(a|b)+, 4"})
-    public void optimizationAll() {
-        String str = "(((abc)))|b";
+    @CsvSource({"(((abc)))|b, 3", "aa?, 3", "(a+)+, 2", "(a|b)+, 4"})
+    public void optimizationAll(String str, int num) {
         RegEx r = ParseTests.parse(str);
         r = Optimizer.optimize(r, (byte) (Optimizer.SIMPLIFY | Optimizer.CONCAT));
-        assertEquals(3, r.traverse().size());
+        assertEquals(num, r.traverse().size());
     }
 }
