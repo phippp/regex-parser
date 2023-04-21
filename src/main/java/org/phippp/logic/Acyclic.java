@@ -98,7 +98,6 @@ public class Acyclic {
         }
         //
         while(!Etilde.equals(E)){
-            // janky way to swap all elements
             E.clear();
             E.addAll(Etilde);
             // nested for loop equivalent to for i,k in [n] where i < k

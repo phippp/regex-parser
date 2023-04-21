@@ -16,7 +16,6 @@ public class MatchTests {
 
     private static final Args ARGS = new Args();
 
-
     @ParameterizedTest
     @CsvSource({
             "a+, , false", "a+, aaaaaaaaaa, true",

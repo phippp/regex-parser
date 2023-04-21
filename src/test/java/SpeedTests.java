@@ -27,7 +27,9 @@ public class SpeedTests {
     @CsvSource({
             "(a)+, aaaaaaaaaaaaa",
             "(a+)+, aaaaaaaaaaaaa",
-            "(a+)$1, aaaaaaaaaaaa"
+            "(a+)$1, aaaaaaaaaaaa",
+            "aa?aa?aa?aa?aa?aa?aa?aa?aa?aa?aa?aa?aa?aa?aa?aa?aa?aa?, aaaaaaaaaaaaaaaaa",
+            "aa?aa?aa?aa?aa?aa?aa?aa?aa?aa?aa?aa?aa?aa?aa?aa?aa?aa?, aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
     })
     public void speedTest(String str, String query){
         long start = System.currentTimeMillis(), middle;

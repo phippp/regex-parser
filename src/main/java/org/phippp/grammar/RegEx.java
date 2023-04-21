@@ -21,10 +21,13 @@ public class RegEx {
 
     private final static Logger LOG = LogManager.getLogger(RegEx.class);
 
+    /* Returns all nodes when used in traversal */
     public static final Predicate<RegEx> ALL = r -> true;
+    /* Returns all nodes that can be concatenated in traversal */
     public static final Predicate<RegEx> SHRINKABLE = r -> {
         return (r.rule == Rule.CONCAT || r.rule == Rule.REFERENCE) && r.right.terminal && r.left.rule != Rule.SIMPLE_GROUP && (r.left.terminal || (r.left.right != null && r.left.right.terminal) );
     };
+    /* Returns the new RegEx after concatenating in traversal */
     public static final Function<RegEx, RegEx> SHRINK = r -> {
         boolean below = !r.left.terminal;
         String str = (below ? r.left.right.text : r.left.text) + r.right.text;
@@ -32,12 +35,15 @@ public class RegEx {
         RegEx[] children = {r.left.left, RegEx.makeTerminal(r.right, Rule.CHARACTER, str)};
         return r.replaceChildren(children);
     };
+    /* Returns all nodes that can be simplified in traversal */
     public static final Predicate<RegEx> EXTENDED_PLUS_OPTIONAL = r -> {
         return (r.rule == Rule.PLUS || r.rule == Rule.OPTIONAL) && r.left.rule == Rule.CHARACTER;
     };
+    /* Returns the new RegEx after simplifying in traversal */
     public static final Function<RegEx, RegEx> SIMPLIFY = r -> {
         return RegEx.makeTerminal(r, r.rule, r.left.text);
     };
+    /* Returns the new RegEx after reordering nodes (not used) */
     public static final Function<RegEx, RegEx> REORDER = r -> {
         if(r.terminal) return r;
         Integer leftNodes = r.left.traverse().size() + 1;
@@ -46,15 +52,16 @@ public class RegEx {
                 : new RegEx[]{new RegEx(r.term + 1, r.left)};
         return r.replaceChildren(children);
     };
+    /* Returns all nodes that are groups in traversal */
     public static final Predicate<RegEx> IS_GROUP = r -> { return r.rule == Rule.SIMPLE_GROUP; };
+    /* Returns the new RegEx after removing any groups in traversal */
     public static final Function<RegEx, RegEx> SKIP = r -> {
         return r.left;
     };
 
     private final Integer term;
     private final Rule rule;
-    private RegEx left;
-    private RegEx right;
+    private RegEx left, right;
     private boolean terminal;
     private final String text;
 
@@ -94,6 +101,11 @@ public class RegEx {
         this.right = children.length > 1 ? children[1] : null;
         return this;
     }
+
+    /**
+     * toString(true) should be called on the root to convert properly
+     * to an FC formulae.
+     */
 
     public String toString(boolean start){
         List<String> variables = Stream.of(this, left, right)
@@ -139,43 +151,6 @@ public class RegEx {
      * node, useful for debugging.
      */
 
-    public boolean match(String str){
-        if(getType() != FILTER && rule != Rule.ALTERNATION) return false;
-        if(rule == Rule.CHARACTER) return text.equals(str);
-        if(rule == Rule.PLUS) {
-            if(terminal) {
-                if (str.length() % text.length() != 0 || str.length() == 0) return false;
-                for (int i = 0; i < str.length(); i += text.length())
-                    if (!str.substring(i, i + text.length()).equals(text)) return false;
-                return true;
-            } else {
-                boolean match = false;
-                for(int j = 1; j < str.length(); j++){
-                    String text = str.substring(0, j);
-                    if(this.left.match(text)) {
-                        int i;
-                        if (str.length() % text.length() != 0) continue;
-                        for (i = 0; i < str.length(); i += text.length())
-                            if(!str.startsWith(text, i)) break;
-                        if (i >= str.length()) {
-                            match = true;
-                            break;
-                        }
-                    }
-
-                }
-                return match;
-            }
-        }
-        if(rule == Rule.OPTIONAL) {
-            return "".equals(str) || (terminal ? text.equals(str) : left.match(str));
-        }
-        if(rule == Rule.ALTERNATION) {
-            return this.left.match(str) || this.right.match(str);
-        }
-        return false;
-    }
-
     public String describe() {
         StringBuilder builder = new StringBuilder();
         builder.append("Term : ").append(this.term)
@@ -194,6 +169,50 @@ public class RegEx {
         }
         String t = term == 0 ? "w" : getVariable();
         return t + DOT_EQ + String.join("", getChildren().stream().map(RegEx::getVariable).toList());
+    }
+
+    /**
+     * Given a string, test whether it matches a given node.
+     */
+
+    public boolean match(String str){
+        if(getType() != FILTER && rule != Rule.ALTERNATION) return false;
+        if(rule == Rule.CHARACTER) return text.equals(str);
+        if(rule == Rule.PLUS) {
+            if(terminal) {
+                // check for (str.length / text.length) = n iterations of text
+                if (str.length() % text.length() != 0 || str.length() == 0) return false;
+                for (int i = 0; i < str.length(); i += text.length())
+                    if (!str.substring(i, i + text.length()).equals(text)) return false;
+                return true;
+            } else {
+                // check for n iterations of text assuming that text can include operators
+                // like ? which shrinks the size i.e. abc? matches ab so (abc?)+ should match
+                // abababab etc.
+                boolean match = false;
+                for(int j = 1; j < str.length(); j++){
+                    String text = str.substring(0, j);
+                    if(this.left.match(text)) {
+                        int i;
+                        if (str.length() % text.length() != 0) continue;
+                        for (i = 0; i < str.length(); i += text.length())
+                            if(!str.startsWith(text, i)) break;
+                        if (i >= str.length()) {
+                            match = true;
+                            break;
+                        }
+                    }
+                }
+                return match;
+            }
+        }
+        if(rule == Rule.OPTIONAL) {
+            return "".equals(str) || (terminal ? text.equals(str) : left.match(str));
+        }
+        if(rule == Rule.ALTERNATION) {
+            return this.left.match(str) || this.right.match(str);
+        }
+        return false;
     }
 
     /**
@@ -244,11 +263,7 @@ public class RegEx {
         return clone;
     }
 
-    /**
-     * Getters, I originally was planning on not having these exposed
-     * at all, however it's becoming a pain to add redundant class
-     * methods.
-     */
+   /* Getter Functions */
 
     public Integer getTerm() {
         return term;

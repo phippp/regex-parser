@@ -9,12 +9,14 @@ import org.phippp.antlr4.RegExParser;
 import org.phippp.grammar.RegEx;
 import org.phippp.visitors.ObjectVisitor;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+
 public class ParseTests {
 
     @ParameterizedTest
-    @ValueSource(strings = {"abc", "(a)$1", "(a|b)c", "(a+|b+)c", "(a+)b$1c", "(a+)b$1c$1", "((a)b)(c)$1$2$3"})
+    @ValueSource(strings = {"abc", "aa?", "(a)$1", "(a|b)c", "(a+|b+)c", "(a+)b$1c", "(a+)b$1c$1", "((a)b)(c)$1$2$3"})
     void parseString(String str){
-        parse(str);
+        assertDoesNotThrow(() -> parse(str));
     }
 
     public static RegEx parse(String str){

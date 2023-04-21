@@ -80,11 +80,11 @@ public class Main {
     }
 
     protected static byte getOptimizations(Args args) {
-        if(args.all) return (byte)(Optimizer.CONCAT | Optimizer.SIMPLIFY | Optimizer.ORDER);
+        if(args.all) return (byte)(Optimizer.CONCAT | Optimizer.SIMPLIFY);
         byte opt = 0;
-        if(args.reorder || args.gyo) opt |= Optimizer.ORDER;
-        if(args.simplify || args.gyo) opt |= Optimizer.SIMPLIFY;
-        if(args.concat) opt |= Optimizer.CONCAT;
+        // if(args.reorder || args.gyo) opt |= Optimizer.ORDER;
+        if(args.simplify)   opt |= Optimizer.SIMPLIFY;
+        if(args.concat)     opt |= Optimizer.CONCAT;
         return opt;
     }
 

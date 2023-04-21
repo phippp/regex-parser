@@ -1,9 +1,7 @@
 package org.phippp.logic;
 
-import org.phippp.app.Args;
 import org.phippp.grammar.RegEx;
 import org.phippp.util.BinaryTree;
-import org.phippp.util.Logging;
 
 import java.util.*;
 import java.util.stream.Stream;

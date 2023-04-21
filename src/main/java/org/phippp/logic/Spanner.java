@@ -25,7 +25,7 @@ public class Spanner {
                 .toList();
         list = new ArrayList<>(list);
         List<RegEx> remove = new ArrayList<>();
-        for(RegEx parent : list)
+            for(RegEx parent : list)
             for(RegEx child : list)
                 if(parent.getChildren().contains(child)) remove.add(child);
         list.removeAll(remove);
