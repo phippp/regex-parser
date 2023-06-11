@@ -6,7 +6,7 @@
         xsi:schemaLocation="http://logging.apache.org/log4j/2.0/config https://raw.githubusercontent.com/apache/logging-log4j2/master/log4j-core/src/main/resources/Log4j-config.xsd"
 >
     <Appenders>
-        <RollingFile name="FILE" fileName="git stat.log" filePattern="/var/log/code/regex.log.%i">
+        <RollingFile name="FILE" fileName="/var/log/code/regex.log" filePattern="/var/log/code/regex.log.%i">
             <PatternLayout pattern="%d{DATE} | %-5p | %c{1} | %m%n"/>
             <!-- Outputs Human Readable Date | Logging Level | Triggering Class | Message -->
             <Policies>
