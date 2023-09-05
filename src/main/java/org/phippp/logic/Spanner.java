@@ -1,7 +1,7 @@
 package org.phippp.logic;
 
 import org.phippp.grammar.RegEx;
-import org.phippp.util.SetHelper;
+import org.phippp.util.SetUtils;
 
 import java.util.*;
 
@@ -75,7 +75,7 @@ public class Spanner {
 
     @Override
     public String toString(){
-        Set<Integer> terms = SetHelper.makeSet(size());
+        Set<Integer> terms = SetUtils.makeSet(size());
         StringBuilder str = new StringBuilder(Parts.ALPHA)
                 .append(Parts.DOT_EQ)
                 .append(String.join(".", terms.stream().map(i -> Parts.ALPHA + "_" + (i + displacement - 1)).toList()))

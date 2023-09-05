@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
+@Deprecated
 public class BinaryTree<T> {
 
     private final static Logger LOG = LogManager.getLogger(BinaryTree.class);

@@ -1,0 +1,5 @@
+package org.phippp.grammar;
+
+public enum Rule {
+    REFERENCE, CHARACTER, ALTERNATION, OPTIONAL, GROUPS, CONCAT, PLUS, SIMPLE_GROUP, NON_GROUP
+}

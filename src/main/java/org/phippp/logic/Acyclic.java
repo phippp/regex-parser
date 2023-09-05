@@ -7,7 +7,7 @@ import org.apache.logging.log4j.Logger;
 import org.phippp.app.Args;
 import org.phippp.util.BinaryTree;
 import org.phippp.util.Logging;
-import org.phippp.util.SetHelper;
+import org.phippp.util.SetUtils;
 
 import java.util.HashSet;
 import java.util.List;
@@ -30,7 +30,7 @@ public class Acyclic {
                 // considers disjoint variables
                 Spanner sp1 = original.subList(i, j + 1);
                 Spanner sp2 = original.subList(j + 1, k + 1);
-                if(sp1.equals(sp2) || SetHelper.disjoint(sp1.var(), sp2.var())){
+                if(sp1.equals(sp2) || SetUtils.disjoint(sp1.var(), sp2.var())){
                     Logging.log(String.format("Rule 1: Attempting to add (%d, %d) and (%d, %d)", i, j + 1, j + 1, k + 1), LOG, args);
                     tree.addToParent(leaf, sp1).addToParent(leaf, sp2);
                     break;
@@ -92,7 +92,7 @@ public class Acyclic {
         Set<Wrapper<Integer>> E = new HashSet<>();
         // generate starting values;
         // a[i, i] is sublist(i, i+1), a[i+1, i+1] is sublist(i+1, i+2), a[i, i+1] is subList(i, i+2)
-        for(int i : SetHelper.makeSet(n - 1)){
+        for(int i : SetUtils.makeSet(n - 1)){
             v.addAll(List.of(Pair.of(i, i + 1), Pair.of(i + 1, i + 2), Pair.of(i, i + 2)));
             Etilde.add(new Wrapper<>(Pair.of(i, i + 2), Pair.of(i, i + 1), Pair.of(i + 1, i + 2)));
         }
@@ -101,7 +101,7 @@ public class Acyclic {
             E.clear();
             E.addAll(Etilde);
             // nested for loop equivalent to for i,k in [n] where i < k
-            for(int i : SetHelper.makeSet(n)){
+            for(int i : SetUtils.makeSet(n)){
                 for(int k = i + 1; k <= n; k++){
                     for(int j = i; j < k; j++){
                         // a[i, k] is subList(i, k+1), a[i, j] is subList(i, j+1), a[j+1, k] is subList(j+1, k+1)
@@ -125,7 +125,7 @@ public class Acyclic {
         Spanner sp1 = spanner.subList(i, j + 1), sp2 = spanner.subList(j + 1, k + 1);
         if(sp1.equals(sp2))
             return true;
-        if(SetHelper.disjoint(sp1.var(), sp2.var()))
+        if(SetUtils.disjoint(sp1.var(), sp2.var()))
             return true;
         for(int x = i; x < j; x++){
             Wrapper<Integer> w1 = new Wrapper<>(i, j+1, i, x+1, x+1, j+1);

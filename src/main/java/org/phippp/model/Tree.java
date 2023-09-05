@@ -1,9 +1,7 @@
 package org.phippp.model;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.phippp.util.BinaryTree;
-
+import org.phippp.util.Logging;
+;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
@@ -20,17 +18,36 @@ import java.util.stream.Stream;
  * @param <T> represents the type of the data to be stored in a node
  */
 public class Tree<T>{
-    private final static Logger LOG = LogManager.getLogger(Tree.class);
 
     protected Node<T> root;
+    private final Type type;
 
-    public Tree(){
+    public static <T> Tree<T> binary(){
+        return new Tree<T>(Type.BINARY);
+    }
+
+    public static <T> Tree<T> binary(T data){
+        return new Tree<T>(Type.BINARY, data);
+    }
+
+    public static <T> Tree<T> simple(){
+        return new Tree<T>(Type.SIMPLE);
+    }
+
+    public static <T> Tree<T> simple(T data){
+        return new Tree<T>(Type.SIMPLE, data);
+    }
+
+    private Tree(Type t, T data){
+        this.type = t;
+        this.root = (t.equals(Type.BINARY)) ? new BinaryNode<>(data) : new SimpleNode<>(data);
+    }
+
+    private Tree(Type t) {
+        this.type = t;
         this.root = null;
     }
 
-    public Tree(T data) {
-        this.root = new SimpleNode<>(data);
-    }
 
     public Stream<Node<T>> traverse(Traversal order){
         if(root == null) return Stream.<Node<T>>builder().build();
@@ -52,7 +69,7 @@ public class Tree<T>{
 
     public void print() {
         this.traverse(Traversal.PRE_ORDER)
-                .peek(n -> LOG.info(String.format("%s", n.getValue())));
+                .peek(n -> Logging.log(String.format("%s", n.getValue()), Tree.class));
     }
 
     public static class SimpleNode<T> implements Node<T>{
@@ -146,5 +163,9 @@ public class Tree<T>{
                 }
             };
         }
+    }
+
+    private enum Type{
+        SIMPLE, BINARY;
     }
 }
