@@ -2,6 +2,7 @@ package org.phippp.model;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.phippp.util.BinaryTree;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,26 +32,28 @@ public class Tree<T>{
         this.root = new SimpleNode<>(data);
     }
 
-    public List<Node<T>> getLeaves(){
-        return this.traverse(Traversal.IN_ORDER)
-                .filter(Node::isLeaf)
-                .toList();
-    }
-
     public Stream<Node<T>> traverse(Traversal order){
         if(root == null) return Stream.<Node<T>>builder().build();
         return this.root.traverse(order);
     }
 
+    public List<Node<T>> getLeaves(){
+        return this.traverse(Traversal.PRE_ORDER)
+                .filter(Node::isLeaf)
+                .toList();
+    }
 
+    public Node<T> find(T value){
+        return this.traverse(Traversal.PRE_ORDER)
+                .filter(n -> n.getValue().equals(value))
+                .findFirst()
+                .orElse(null);
+    }
 
-
-
-
-
-
-
-
+    public void print() {
+        this.traverse(Traversal.PRE_ORDER)
+                .peek(n -> LOG.info(String.format("%s", n.getValue())));
+    }
 
     public static class SimpleNode<T> implements Node<T>{
         protected final T value;
@@ -125,12 +128,12 @@ public class Tree<T>{
                 case IN_ORDER -> {
                     Stream<Node<T>> s = Stream.empty();
                     if(this.left != null) s = Stream.concat(s, this.left.traverse(order));
-                    s = Stream.concat(s, Stream.of(this));
+                    s = Stream.concat(s, Stream.of(new BinaryNode<>(this.value)));
                     if(this.right != null) s = Stream.concat(s, this.right.traverse(order));
                     yield s;
                 }
                 case PRE_ORDER -> {
-                    Stream<Node<T>> s = Stream.of(this);
+                    Stream<Node<T>> s = Stream.of(new BinaryNode<>(this.value));
                     if(this.left != null) s = Stream.concat(s, this.left.traverse(order));
                     if(this.right != null) s = Stream.concat(s, this.right.traverse(order));
                     yield s;
@@ -139,7 +142,7 @@ public class Tree<T>{
                     Stream<Node<T>> s = Stream.empty();
                     if(this.left != null) s = Stream.concat(s, this.left.traverse(order));
                     if(this.right != null) s = Stream.concat(s, this.right.traverse(order));
-                    yield Stream.concat(s, Stream.of(this));
+                    yield Stream.concat(s, Stream.of(new BinaryNode<>(this.value)));
                 }
             };
         }

@@ -19,5 +19,9 @@ public interface Node<T> {
      */
     boolean add(T value);
 
+    /**
+     * @param order {@link Traversal} enum
+     * @return a stream of all nodes under this node
+     */
     Stream<Node<T>> traverse(Traversal order);
 }
